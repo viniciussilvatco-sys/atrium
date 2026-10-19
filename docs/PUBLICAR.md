@@ -28,7 +28,7 @@ git init
 git add .
 git commit -m "Primeira versão do Atrium"
 git branch -M main
-git remote add origin https://github.com/SEU-USUARIO/atrium.git
+git remote add origin https://github.com/viniciussilvatco-sys/atrium.git
 git push -u origin main
 ```
 

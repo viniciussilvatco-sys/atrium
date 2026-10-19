@@ -57,6 +57,7 @@ export async function deleteProfile(id: string) {
 // ---------- Páginas ----------
 
 export interface NewPageInput {
+  id?: string;
   profileId: string;
   parentId?: string | null;
   kind?: PageKind;
@@ -85,7 +86,7 @@ export async function createPage(input: NewPageInput): Promise<Page> {
   const now = Date.now();
   const content = input.content ?? [];
   const page: Page = stamp({
-    id: newId(),
+    id: input.id ?? newId(),
     profileId: input.profileId,
     parentId,
     kind: input.kind ?? "page",

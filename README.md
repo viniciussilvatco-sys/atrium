@@ -26,6 +26,7 @@ Para rodar no PC: `npm install` e depois `npm run dev` → <http://localhost:517
 | Busca | `Ctrl+K` — títulos e conteúdo, ignora acentos; opção de buscar em todos os perfis. |
 | Favoritos e lixeira | ☆ no topo da página; páginas excluídas ficam 30 dias na lixeira. |
 | Tema | Claro, escuro ou automático (Configurações). |
+| Importar do Notion | Configurações → Importar do Notion: escolha o .zip exportado do Notion em “Markdown & CSV”. Subpáginas, imagens, PDFs, callouts, fórmulas e links entre páginas são mantidos; tudo entra numa página “Importado do Notion”. |
 | Exportar e backup | Página ou perfil em Markdown (.zip com imagens), PDF pela impressão, backup completo em .json com restauração. |
 | Sincronização | Configurações → Conectar Google Drive. Sincroniza ao abrir, ao voltar para o app, a cada minuto com alterações e no botão ⟳. |
 

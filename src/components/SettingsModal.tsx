@@ -6,7 +6,9 @@ import { authChanges, connect, disconnect, getAuthState, getClientId, getConnect
 import { getQuota } from "../sync/driveApi";
 import { resetSyncState, syncNow } from "../sync/syncEngine";
 import { exportBackup, exportProfile, importBackup } from "../export/exporter";
-import { themeStore, useStore, type ThemePref } from "../lib/store";
+import { currentProfileStore, navigate, themeStore, useStore, type ThemePref } from "../lib/store";
+import { useProfiles } from "../db/hooks";
+import { importNotionZip, type ImportResult } from "../import/notionImport";
 import { installPrompt } from "../lib/install";
 import { useSyncStatus } from "./Sidebar";
 import { Modal, confirmAction, timeAgo, toast } from "./ui";
@@ -124,6 +126,94 @@ function GoogleSection() {
   );
 }
 
+function NotionImportSection({ profile, onDone }: { profile: Profile | undefined; onDone: () => void }) {
+  const profiles = useProfiles() ?? [];
+  const [target, setTarget] = useState(profile?.id ?? "");
+  const [progress, setProgress] = useState<string | null>(null);
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const profileId = target || profile?.id || profiles[0]?.id;
+
+  const run = async (file: File) => {
+    if (!profileId) return;
+    setError(null);
+    setResult(null);
+    try {
+      const r = await importNotionZip(file, profileId, setProgress);
+      setResult(r);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setProgress(null);
+    }
+  };
+
+  return (
+    <div className="settings-section">
+      <h3>📥 Importar do Notion</h3>
+      <p>
+        No Notion, vá em <b>Configurações → Geral (ou Workspace) → Exportar todo o conteúdo do espaço de trabalho</b>, escolha o formato{" "}
+        <b>Markdown &amp; CSV</b> e <b>Incluir conteúdo: Tudo</b>. Você recebe um arquivo <b>.zip</b> (por download ou e-mail) — escolha-o aqui. Também
+        funciona com a exportação de uma página só (menu ⋯ da página → Exportar).
+      </p>
+      <div className="row">
+        <span>Importar para o perfil:</span>
+        <select className="input" style={{ width: "auto" }} value={profileId} onChange={(e) => setTarget(e.target.value)} disabled={!!progress}>
+          {profiles.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.icon} {p.name}
+            </option>
+          ))}
+        </select>
+        <button className="btn primary" disabled={!!progress || !profileId} onClick={() => input.current?.click()}>
+          {progress ? "Importando…" : "Escolher arquivo .zip"}
+        </button>
+        <input
+          ref={input}
+          type="file"
+          accept=".zip,application/zip"
+          hidden
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            if (f) run(f);
+          }}
+        />
+      </div>
+      {progress && <p className="faint">⏳ {progress}</p>}
+      {error && <p style={{ color: "var(--danger)" }}>Erro: {error}</p>}
+      {result && (
+        <>
+          <p>
+            ✅ {result.pages} página(s) e {result.files} arquivo(s) importados para a página <b>“Importado do Notion”</b>.
+          </p>
+          {result.warnings.length > 0 && (
+            <details>
+              <summary className="faint">{result.warnings.length} aviso(s)</summary>
+              <ul className="faint">
+                {result.warnings.map((w, i) => (
+                  <li key={i}>{w}</li>
+                ))}
+              </ul>
+            </details>
+          )}
+          <button
+            className="btn"
+            onClick={() => {
+              if (profileId) currentProfileStore.set(profileId);
+              navigate(result.rootPageId);
+              onDone();
+            }}
+          >
+            Abrir páginas importadas
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 function InstallSection() {
   const prompt = useStore(installPrompt);
   const standalone = window.matchMedia("(display-mode: standalone)").matches;
@@ -232,6 +322,8 @@ export function SettingsModal({ profile, onClose }: { profile: Profile | undefin
           />
         </div>
       </div>
+
+      <NotionImportSection profile={profile} onDone={onClose} />
 
       <InstallSection />
 
