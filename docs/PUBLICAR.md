@@ -20,7 +20,7 @@ que você abre no PC, no notebook e no celular. É **gratuito**.
 
 ## Passo 3 — Enviar o código
 
-Abra o terminal (PowerShell) na pasta do projeto (`C:\Users\vinic\Projetos Claude\PNotion`) e rode,
+Abra o terminal (PowerShell) na pasta do projeto (`C:\Users\vinic\Projetos Claude\Atrium`) e rode,
 trocando `SEU-USUARIO`:
 
 ```powershell
