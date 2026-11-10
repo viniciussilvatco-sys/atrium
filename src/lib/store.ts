@@ -36,6 +36,8 @@ export function useStore<T>(store: { get: () => T; subscribe: (l: () => void) =>
 export type ThemePref = "light" | "dark" | "system";
 export const themeStore = createPersistedStore<ThemePref>("atrium.theme", "system");
 export const currentProfileStore = createPersistedStore<string | null>("atrium.profile", null);
+/** Últimos itens usados no menu "/" (ids de `slashItemId`), do mais recente ao mais antigo. */
+export const recentSlashStore = createPersistedStore<string[]>("atrium.slashRecent", []);
 export const sidebarStore = createPersistedStore<{ width: number; collapsed: boolean; expanded: Record<string, boolean> }>(
   "atrium.sidebar",
   { width: 260, collapsed: false, expanded: {} },

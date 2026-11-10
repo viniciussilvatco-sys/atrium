@@ -17,7 +17,7 @@ Publicado em <https://viniciussilvatco-sys.github.io/atrium/> (repositório `vin
 
 ```
 npm run dev        # http://localhost:5173
-npm test           # Vitest (funções puras: merge, filtros, export, importação do Notion, embeds)
+npm test           # Vitest (funções puras: merge, filtros, export, importação do Notion, embeds, recentes do menu "/")
 npm run typecheck  # tsc -b
 npm run build      # tsc + vite build (gera dist/, PWA com service worker)
 ```

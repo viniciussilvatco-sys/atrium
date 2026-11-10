@@ -18,7 +18,8 @@ import { resolveAssetUrl, storeFile } from "./assets";
 import type { Page } from "../db/types";
 import { db } from "../db/schema";
 import { createDatabase, createPage, updatePage } from "../db/repo";
-import { effectiveThemeStore, navigate, useStore } from "../lib/store";
+import { effectiveThemeStore, navigate, recentSlashStore, useStore } from "../lib/store";
+import { pushRecent, slashItemId, withRecents } from "./recentSlash";
 import { pageTitle } from "../components/ui";
 import { Clapperboard, Database, FilePlus, FileText, Lightbulb, Sigma } from "lucide-react";
 
@@ -226,9 +227,21 @@ export function PageEditor({
       <BlockNoteView editor={editor} theme={theme} editable={editable} onChange={onChange} slashMenu={false}>
       <SuggestionMenuController
         triggerCharacter="/"
-        getItems={async (query) =>
-          filterSuggestionItems([...getDefaultReactSlashMenuItems(editor), ...atriumSlashItems(editor, pageRef.current, flush)], query)
-        }
+        getItems={async (query) => {
+          const items = filterSuggestionItems(
+            [...getDefaultReactSlashMenuItems(editor), ...atriumSlashItems(editor, pageRef.current, flush)],
+            query,
+          );
+          // Sem nada digitado depois da "/", os últimos 5 itens usados aparecem no topo.
+          const list = query.trim() ? items : withRecents(items, recentSlashStore.get());
+          // Só o título de cada opção: a descrição (subtext) é removida depois do filtro,
+          // então a busca continua encontrando pelos apelidos (aliases).
+          return list.map((item) => ({ ...item, subtext: undefined }));
+        }}
+        onItemClick={(item) => {
+          recentSlashStore.set(pushRecent(recentSlashStore.get(), slashItemId(item)));
+          item.onItemClick();
+        }}
       />
       <SuggestionMenuController triggerCharacter="@" getItems={(query) => mentionItems(editor, pageRef.current, query)} />
       </BlockNoteView>

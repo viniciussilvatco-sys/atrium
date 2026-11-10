@@ -22,6 +22,15 @@
   --radius-lg: 12px;
   --ease: cubic-bezier(0.2, 0.9, 0.3, 1);
 
+  /* Botões em relevo (menu "/") */
+  --tile-top: #ffffff;
+  --tile-bottom: #fafaf9;
+  --tile-border: rgba(55, 53, 47, 0.08);
+  --tile-border-bottom: rgba(55, 53, 47, 0.13);
+  --tile-highlight: rgba(255, 255, 255, 0.8);
+  --tile-shadow: 0 1px 1px rgba(15, 15, 15, 0.03);
+  --tile-shadow-hover: 0 1px 2px rgba(15, 15, 15, 0.05), 0 2px 6px rgba(15, 15, 15, 0.04);
+
   --tag-gray: #e3e2e0;
   --tag-brown: #eee0da;
   --tag-orange: #fadec9;
@@ -52,6 +61,14 @@
   --lift: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 1px 3px rgba(0, 0, 0, 0.35);
   --accent-soft: color-mix(in srgb, var(--accent) 22%, transparent);
   --accent-soft-text: color-mix(in srgb, var(--accent) 70%, white);
+
+  --tile-top: #2a2a2a;
+  --tile-bottom: #272727;
+  --tile-border: rgba(255, 255, 255, 0.05);
+  --tile-border-bottom: rgba(0, 0, 0, 0.35);
+  --tile-highlight: rgba(255, 255, 255, 0.04);
+  --tile-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  --tile-shadow-hover: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
 
   --tag-gray: #373737;
   --tag-brown: #4a3a33;
@@ -1693,4 +1710,86 @@ a {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ---------- Menu "/" e "@": itens em relevo ---------- */
+/* `:root` na frente aumenta a prioridade sobre o CSS do BlockNote, que é carregado depois. */
+
+:root .bn-mantine .bn-suggestion-menu {
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: var(--bg-elevated);
+  animation: pop 0.16s var(--ease);
+}
+:root .bn-mantine .bn-suggestion-menu-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  padding: 10px 6px 4px;
+}
+:root .bn-mantine .bn-suggestion-menu-item {
+  margin: 3px 0;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--tile-top), var(--tile-bottom));
+  border: 1px solid var(--tile-border);
+  border-bottom-color: var(--tile-border-bottom);
+  box-shadow:
+    inset 0 1px 0 var(--tile-highlight),
+    var(--tile-shadow);
+  transition:
+    transform 0.12s var(--ease),
+    box-shadow 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+:root .bn-mantine .bn-suggestion-menu-item:not(.bn-suggestion-menu-item-small) {
+  min-height: 0;
+}
+:root .bn-mantine .bn-suggestion-menu-item[aria-selected="true"],
+:root .bn-mantine .bn-suggestion-menu-item:hover {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 60%, transparent), transparent 140%),
+    linear-gradient(180deg, var(--tile-top), var(--tile-bottom));
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--tile-border));
+  border-bottom-color: color-mix(in srgb, var(--accent) 25%, var(--tile-border-bottom));
+  box-shadow:
+    inset 0 1px 0 var(--tile-highlight),
+    var(--tile-shadow-hover);
+}
+:root .bn-mantine .bn-suggestion-menu-item:active {
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.08),
+    0 0 0 transparent;
+}
+/* Ícone em uma "tecla" própria */
+:root .bn-mt-suggestion-menu-item-section[data-position="left"] {
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+:root .bn-suggestion-menu-item[aria-selected="true"] .bn-mt-suggestion-menu-item-section[data-position="left"],
+:root .bn-suggestion-menu-item:hover .bn-mt-suggestion-menu-item-section[data-position="left"] {
+  color: var(--accent-soft-text);
+}
+:root .bn-mt-suggestion-menu-item-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+:root .bn-mt-suggestion-menu-item-subtitle:empty {
+  display: none;
+}
+:root .bn-mt-suggestion-menu-item-section[data-position="right"] .mantine-Badge-root {
+  background: transparent;
+  color: var(--text-faint);
+  border: 1px solid var(--tile-border);
+  font-weight: 500;
 }
