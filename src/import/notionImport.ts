@@ -14,6 +14,7 @@ import {
   dirname,
   localLinks,
   parseNotionName,
+  pickPagePaths,
   postprocessBlocks,
   preprocessNotionMarkdown,
   resolvePath,
@@ -70,7 +71,7 @@ async function readEntries(file: Blob, onProgress: Progress): Promise<Map<string
 export async function importNotionZip(file: File, profileId: string, onProgress: Progress = () => {}): Promise<ImportResult> {
   onProgress("Lendo o arquivo…");
   const entries = await readEntries(file, onProgress);
-  const pagePaths = [...entries.keys()].filter((p) => /\.(md|csv)$/i.test(p));
+  const { pagePaths, textSource } = pickPagePaths([...entries.keys()]);
   if (!pagePaths.length) throw new Error("Não encontrei páginas neste ZIP. Exporte do Notion no formato “Markdown & CSV”.");
 
   // Ids definidos antes, para que os links entre páginas possam ser resolvidos.
@@ -93,7 +94,7 @@ export async function importNotionZip(file: File, profileId: string, onProgress:
   // 1) Envia os arquivos (imagens, PDFs…) referenciados pelas páginas.
   const assetByPath = new Map<string, { id: string; name: string; mime: string }>();
   const texts = new Map<string, string>();
-  for (const p of pagePaths) texts.set(p, await entries.get(p)!.async("string"));
+  for (const p of pagePaths) texts.set(p, await entries.get(textSource.get(p) ?? p)!.async("string"));
 
   const toUpload: { path: string; pageId: string }[] = [];
   for (const p of pagePaths) {

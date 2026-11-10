@@ -12,6 +12,26 @@ export function parseNotionName(fileName: string): { title: string; base: string
   return { title: base.replace(NOTION_ID, "").trim() || "Sem título", base };
 }
 
+/**
+ * Escolhe quais arquivos do ZIP viram páginas. O Notion exporta cada banco de dados duas vezes:
+ * "Nome <id>.csv" (só o que a visualização mostra) e "Nome <id>_all.csv" (todas as linhas).
+ * Fica uma página só, no caminho normal, usando o conteúdo do "_all" (mais completo).
+ */
+export function pickPagePaths(paths: string[]): { pagePaths: string[]; textSource: Map<string, string> } {
+  const all = new Set(paths);
+  const textSource = new Map<string, string>();
+  const pagePaths: string[] = [];
+  for (const p of paths) {
+    if (!/\.(md|csv)$/i.test(p)) continue;
+    const allMatch = /^(.*)_all\.csv$/i.exec(p);
+    if (allMatch && all.has(`${allMatch[1]}.csv`)) continue; // o "_all" substitui o conteúdo do irmão
+    pagePaths.push(p);
+    const allSibling = p.replace(/\.csv$/i, "_all.csv");
+    textSource.set(p, /\.csv$/i.test(p) && all.has(allSibling) ? allSibling : p);
+  }
+  return { pagePaths, textSource };
+}
+
 export function dirname(path: string): string {
   const i = path.lastIndexOf("/");
   return i < 0 ? "" : path.slice(0, i);

@@ -4,6 +4,7 @@ import {
   buildParents,
   csvToMarkdownTable,
   parseNotionName,
+  pickPagePaths,
   postprocessBlocks,
   preprocessNotionMarkdown,
   resolvePath,
@@ -123,5 +124,20 @@ describe("postprocessBlocks", () => {
     expect((out[3].content as { type: string }[])[1]).toEqual({ type: "pageLink", props: { pageId: "other", title: "Outra" } });
     expect(out[4]).toEqual({ type: "pdf", props: { url: "asset://f1", name: "doc.pdf" } });
     expect(out[5].props?.url).toBe("asset://img1");
+  });
+});
+
+describe("bancos de dados exportados em dobro", () => {
+  it("usa o _all.csv como conteúdo e não cria página duplicada", () => {
+    const { pagePaths, textSource } = pickPagePaths([
+      "Tarefas abc.csv",
+      "Tarefas abc_all.csv",
+      "Só all x_all.csv",
+      "Nota.md",
+      "imagem.png",
+    ]);
+    expect(pagePaths).toEqual(["Tarefas abc.csv", "Só all x_all.csv", "Nota.md"]);
+    expect(textSource.get("Tarefas abc.csv")).toBe("Tarefas abc_all.csv");
+    expect(textSource.get("Nota.md")).toBe("Nota.md");
   });
 });
