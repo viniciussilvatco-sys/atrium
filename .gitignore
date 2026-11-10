@@ -6,3 +6,7 @@ dist
 
 # Exportações/backup com anotações pessoais — nunca publicar
 *.zip
+
+# Atalho local (recriado com npm run atalho)
+Atrium.lnk
+scripts/atrium.ico

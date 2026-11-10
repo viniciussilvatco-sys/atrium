@@ -8,6 +8,10 @@ Publicado em <https://viniciussilvatco-sys.github.io/atrium/> (repositório `vin
 - Fala português do Brasil e é **iniciante** em programação: explique em português, passo a passo, sem jargão.
 - Toda a interface e os textos do app são em **pt-BR**.
 - `git push` para `main` **publica automaticamente** (GitHub Actions → Pages). Só faça commit/push quando ele pedir.
+- O usuário abre o app pelo atalho `Atrium.lnk` na pasta do projeto (Chrome em modo app, apontando para a versão
+  publicada). **Depois de cada publicação, rode `npm run atalho`** para recriá-lo (`scripts/criar-atalho.ps1`; o
+  `.lnk` e o `.ico` gerados ficam fora do git).
+- Nunca faça commit de arquivos `.zip` (exportações do Notion com anotações pessoais; já estão no `.gitignore`).
 
 ## Comandos
 

@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "atalho": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/criar-atalho.ps1"
   },
   "dependencies": {
     "@blocknote/code-block": "^0.56.0",
