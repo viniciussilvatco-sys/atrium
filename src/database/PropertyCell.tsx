@@ -3,6 +3,7 @@ import type { Page, PropDef, SelectOption } from "../db/types";
 import { Popover, type Anchor } from "../components/ui";
 import { addOption, deleteOption, setRowProp, updateOption } from "./actions";
 import { TAG_COLORS, formatDateValue } from "./query";
+import { Ellipsis, Plus, Trash2, X } from "../components/icons";
 
 export function Tag({ option, onRemove }: { option: SelectOption; onRemove?: () => void }) {
   return (
@@ -14,9 +15,10 @@ export function Tag({ option, onRemove }: { option: SelectOption; onRemove?: () 
             e.stopPropagation();
             onRemove();
           }}
-          style={{ opacity: 0.6 }}
+          style={{ opacity: 0.6, display: "inline-flex" }}
+          aria-label="Remover"
         >
-          ✕
+          <X className="tiny" />
         </button>
       )}
     </span>
@@ -59,7 +61,10 @@ function OptionEditor({ dbId, def, option, anchor, onClose }: { dbId: string; de
           onClose();
         }}
       >
-        <span className="mi-icon">🗑</span> Excluir opção
+        <span className="mi-icon">
+          <Trash2 />
+        </span>{" "}
+        Excluir opção
       </button>
       <div className="menu-label">Cor</div>
       {TAG_COLORS.map((c) => (
@@ -135,13 +140,16 @@ function SelectEditor({ dbId, def, row, anchor, onClose }: { dbId: string; def: 
               setEditing({ option: o, anchor: e.currentTarget });
             }}
           >
-            ⋯
+            <Ellipsis />
           </button>
         </div>
       ))}
       {q && !exact && (
         <button className="menu-item" onClick={create}>
-          <span className="mi-icon">＋</span> Criar <Tag option={{ id: "", name: query.trim(), color: TAG_COLORS[options.length % TAG_COLORS.length] }} />
+          <span className="mi-icon">
+            <Plus />
+          </span>{" "}
+          Criar <Tag option={{ id: "", name: query.trim(), color: TAG_COLORS[options.length % TAG_COLORS.length] }} />
         </button>
       )}
       {editing && (

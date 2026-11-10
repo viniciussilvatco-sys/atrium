@@ -4,6 +4,7 @@ import { createProfile, deleteProfile, PROFILE_COLORS, updateProfile } from "../
 import { currentProfileStore, navigate } from "../lib/store";
 import { Modal, Popover, confirmAction, type Anchor } from "./ui";
 import { EmojiPicker } from "./EmojiPicker";
+import { Check, ChevronsUpDown, Pencil, Plus, Trash2 } from "./icons";
 
 export function ProfileBadge({ profile, size = 24 }: { profile: Pick<Profile, "icon" | "color">; size?: number }) {
   return (
@@ -80,7 +81,7 @@ export function ProfileSwitcher({ profiles, current }: { profiles: Profile[]; cu
       <div className="profile-switch" onClick={(e) => setAnchor(e.currentTarget)}>
         {current ? <ProfileBadge profile={current} /> : null}
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{current?.name ?? "Atrium"}</span>
-        <span className="faint">⇅</span>
+        <ChevronsUpDown className="faint" />
       </div>
       {anchor && (
         <Popover anchor={anchor} onClose={() => setAnchor(null)} width={260}>
@@ -98,7 +99,7 @@ export function ProfileSwitcher({ profiles, current }: { profiles: Profile[]; cu
             >
               <ProfileBadge profile={p} size={22} />
               <span style={{ flex: 1 }}>{p.name}</span>
-              {p.id === current?.id && <span>✓</span>}
+              {p.id === current?.id && <Check />}
               <button
                 className="icon-btn"
                 title="Editar perfil"
@@ -108,7 +109,7 @@ export function ProfileSwitcher({ profiles, current }: { profiles: Profile[]; cu
                   setEditing(p);
                 }}
               >
-                ✎
+                <Pencil />
               </button>
             </div>
           ))}
@@ -120,7 +121,10 @@ export function ProfileSwitcher({ profiles, current }: { profiles: Profile[]; cu
               setEditing("new");
             }}
           >
-            <span className="mi-icon">＋</span> Novo perfil
+            <span className="mi-icon">
+              <Plus />
+            </span>{" "}
+            Novo perfil
           </button>
           {current && profiles.length > 1 && (
             <button
@@ -134,7 +138,10 @@ export function ProfileSwitcher({ profiles, current }: { profiles: Profile[]; cu
                 navigate(null);
               }}
             >
-              <span className="mi-icon">🗑</span> Excluir perfil atual
+              <span className="mi-icon">
+                <Trash2 />
+              </span>{" "}
+              Excluir perfil atual
             </button>
           )}
         </Popover>

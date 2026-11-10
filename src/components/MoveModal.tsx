@@ -5,6 +5,7 @@ import type { Page, Profile } from "../db/types";
 import { usePage, useTreePages } from "../db/hooks";
 import { getDescendants, movePage } from "../db/repo";
 import { Modal, pageTitle, toast } from "./ui";
+import { ArrowUpToLine, FileText } from "./icons";
 
 export function MoveModal({ pageId, profiles, onClose }: { pageId: string; profiles: Profile[]; onClose: () => void }) {
   const page = usePage(pageId);
@@ -67,7 +68,9 @@ export function MoveModal({ pageId, profiles, onClose }: { pageId: string; profi
       <input className="input" placeholder="Procurar página de destino…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: "100%", marginBottom: 8 }} />
       <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
         <div className="list-row" style={{ cursor: "pointer" }} onClick={() => moveTo(null)}>
-          <span>⬆️</span>
+          <span className="icon">
+            <ArrowUpToLine />
+          </span>
           <span className="grow">
             <b>Primeiro nível</b> <span className="faint">(direto na barra lateral)</span>
           </span>
@@ -79,7 +82,7 @@ export function MoveModal({ pageId, profiles, onClose }: { pageId: string; profi
             style={{ cursor: "pointer", paddingLeft: 8 + depth * 16, fontWeight: p.id === page.parentId ? 600 : undefined }}
             onClick={() => moveTo(p)}
           >
-            <span>{p.icon || "📄"}</span>
+            <span className="icon">{p.icon || <FileText />}</span>
             <span className="grow">
               {pageTitle(p)}
               {p.id === page.parentId && <span className="faint"> · local atual</span>}

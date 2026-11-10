@@ -6,7 +6,7 @@ import { navigate } from "../lib/store";
 import { PropertyCell } from "./PropertyCell";
 import { PropertyMenu, PropTypePicker } from "./PropertyMenu";
 import { addProperty } from "./actions";
-import { PROP_TYPE_LABELS } from "./query";
+import { ArrowUpRight, Copy, EllipsisVertical, Plus, PROP_TYPE_ICONS, Trash2, Type } from "../components/icons";
 
 function TitleCell({ row }: { row: Page }) {
   const [editing, setEditing] = useState(false);
@@ -52,17 +52,17 @@ function RowMenuButton({ row }: { row: Page }) {
   return (
     <>
       <button className="icon-btn" onClick={menu.open} title="Opções da linha">
-        ⋮
+        <EllipsisVertical />
       </button>
       {menu.anchor && (
         <Menu
           anchor={menu.anchor}
           onClose={menu.close}
           items={[
-            { label: "Abrir como página", icon: "↗", onClick: () => navigate(row.id) },
-            { label: "Duplicar", icon: "⧉", onClick: () => duplicatePage(row.id) },
+            { label: "Abrir como página", icon: <ArrowUpRight />, onClick: () => navigate(row.id) },
+            { label: "Duplicar", icon: <Copy />, onClick: () => duplicatePage(row.id) },
             { separator: true },
-            { label: "Excluir", icon: "🗑", danger: true, onClick: () => trashPage(row.id) },
+            { label: "Excluir", icon: <Trash2 />, danger: true, onClick: () => trashPage(row.id) },
           ]}
         />
       )}
@@ -95,19 +95,19 @@ export function TableView({
               <th style={{ width: 28, border: "none" }} />
               <th>
                 <button className="th-btn" onClick={(e) => setMenu({ def: null, anchor: e.currentTarget })}>
-                  <span>Aa</span> Nome
+                  <Type /> Nome
                 </button>
               </th>
               {visible.map((d) => (
                 <th key={d.id}>
                   <button className="th-btn" onClick={(e) => setMenu({ def: d, anchor: e.currentTarget })}>
-                    <span>{PROP_TYPE_LABELS[d.type].icon}</span> {d.name}
+                    {PROP_TYPE_ICONS[d.type]} {d.name}
                   </button>
                 </th>
               ))}
               <th style={{ width: 40 }}>
                 <button className="th-btn" title="Adicionar propriedade" onClick={(e) => setAddAnchor(e.currentTarget)}>
-                  ＋
+                  <Plus />
                 </button>
               </th>
             </tr>
@@ -133,7 +133,7 @@ export function TableView({
         </table>
       </div>
       <button className="add-row" onClick={onAdd}>
-        ＋ Novo
+        <Plus /> Novo
       </button>
       <div className="faint" style={{ padding: "6px 8px" }}>
         {rows.length} {rows.length === 1 ? "item" : "itens"}

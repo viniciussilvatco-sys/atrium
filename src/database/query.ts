@@ -2,15 +2,15 @@ import type { DbFilter, DbView, FilterOp, Page, PropDef, PropType } from "../db/
 
 export const TAG_COLORS = ["gray", "brown", "orange", "yellow", "green", "blue", "purple", "pink", "red"];
 
-export const PROP_TYPE_LABELS: Record<PropType, { label: string; icon: string }> = {
-  text: { label: "Texto", icon: "≡" },
-  number: { label: "Número", icon: "#" },
-  select: { label: "Seleção", icon: "◉" },
-  multiselect: { label: "Seleção múltipla", icon: "☰" },
-  status: { label: "Status", icon: "◐" },
-  date: { label: "Data", icon: "📅" },
-  checkbox: { label: "Caixa de seleção", icon: "☑" },
-  url: { label: "URL", icon: "🔗" },
+export const PROP_TYPE_LABELS: Record<PropType, { label: string }> = {
+  text: { label: "Texto" },
+  number: { label: "Número" },
+  select: { label: "Seleção" },
+  multiselect: { label: "Seleção múltipla" },
+  status: { label: "Status" },
+  date: { label: "Data" },
+  checkbox: { label: "Caixa de seleção" },
+  url: { label: "URL" },
 };
 
 export const FILTER_OPS: Record<PropType | "title", FilterOp[]> = {

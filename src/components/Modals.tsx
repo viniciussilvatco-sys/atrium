@@ -7,6 +7,7 @@ import { BUILTIN_TEMPLATES, createFromBuiltin, createFromUserTemplate } from "..
 import { remoteChanges } from "../sync/syncEngine";
 import { openPage } from "./PageTree";
 import { Modal, confirmAction, formatDate, pageTitle, timeAgo, toast } from "./ui";
+import { FileText, Trash2 } from "./icons";
 
 export function TrashModal({ profile, onClose }: { profile: Profile; onClose: () => void }) {
   const items = useTrash(profile.id) ?? [];
@@ -18,7 +19,7 @@ export function TrashModal({ profile, onClose }: { profile: Profile; onClose: ()
       {!items.length && <div className="faint" style={{ padding: 12, textAlign: "center" }}>A lixeira está vazia.</div>}
       {items.map((p) => (
         <div key={p.id} className="list-row">
-          <span>{p.icon || "📄"}</span>
+          <span className="icon">{p.icon || <FileText />}</span>
           <span className="grow" style={{ cursor: "pointer" }} onClick={() => (openPage(p.id), onClose())}>
             {pageTitle(p)} <span className="faint">· excluída {timeAgo(p.trashedAt!)}</span>
           </span>
@@ -30,7 +31,7 @@ export function TrashModal({ profile, onClose }: { profile: Profile; onClose: ()
             title="Excluir definitivamente"
             onClick={() => confirmAction(`Excluir "${pageTitle(p)}" definitivamente?`) && deletePageForever(p.id)}
           >
-            🗑
+            <Trash2 />
           </button>
         </div>
       ))}

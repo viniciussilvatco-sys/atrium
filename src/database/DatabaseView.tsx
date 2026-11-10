@@ -11,6 +11,7 @@ import { TableView } from "./TableView";
 import { BoardView } from "./BoardView";
 import { CalendarView } from "./CalendarView";
 import { ListView } from "./ListView";
+import { ArrowUpRight, Plus, Settings, Trash2, VIEW_ICONS, X } from "../components/icons";
 
 const activeViews = createPersistedStore<Record<string, string>>("atrium.activeViews", {});
 
@@ -81,7 +82,7 @@ function FilterPanel({ dbPage, view, anchor, onClose }: { dbPage: Page; view: Db
             </select>
             <FilterValueInput dbPage={dbPage} filter={f} onChange={(value) => update({ value })} />
             <button className="icon-btn" onClick={() => setFilters(view.filters.filter((x) => x.id !== f.id))} title="Remover filtro">
-              ✕
+              <X />
             </button>
           </div>
         );
@@ -90,7 +91,10 @@ function FilterPanel({ dbPage, view, anchor, onClose }: { dbPage: Page; view: Db
         className="menu-item"
         onClick={() => setFilters([...view.filters, { id: newId(), propId: "title", op: "contains", value: "" }])}
       >
-        <span className="mi-icon">＋</span> Adicionar filtro
+        <span className="mi-icon">
+          <Plus />
+        </span>{" "}
+        Adicionar filtro
       </button>
     </Popover>
   );
@@ -120,13 +124,16 @@ function SortPanel({ dbPage, view, anchor, onClose }: { dbPage: Page; view: DbVi
             <option value="asc">Crescente</option>
             <option value="desc">Decrescente</option>
           </select>
-          <button className="icon-btn" onClick={() => setSorts(view.sorts.filter((_, j) => j !== i))}>
-            ✕
+          <button className="icon-btn" title="Remover ordenação" onClick={() => setSorts(view.sorts.filter((_, j) => j !== i))}>
+            <X />
           </button>
         </div>
       ))}
       <button className="menu-item" onClick={() => setSorts([...view.sorts, { propId: "title", dir: "asc" }])}>
-        <span className="mi-icon">＋</span> Adicionar ordenação
+        <span className="mi-icon">
+          <Plus />
+        </span>{" "}
+        Adicionar ordenação
       </button>
     </Popover>
   );
@@ -215,7 +222,10 @@ function ViewSettings({ dbPage, view, anchor, onClose }: { dbPage: Page; view: D
           onClose();
         }}
       >
-        <span className="mi-icon">🗑</span> Excluir visão
+        <span className="mi-icon">
+          <Trash2 />
+        </span>{" "}
+        Excluir visão
       </button>
     </Popover>
   );
@@ -229,7 +239,9 @@ export function DatabaseView({ databaseId, inline }: { databaseId: string; inlin
 
   if (dbPage === undefined) return <div className="faint">Carregando banco de dados…</div>;
   if (!dbPage || dbPage.deleted) return <div className="embed-placeholder">Este banco de dados foi excluído.</div>;
-  if (dbPage.trashedAt !== null && inline) return <div className="embed-placeholder">🗑 Este banco de dados está na lixeira.</div>;
+  if (dbPage.trashedAt !== null && inline) return <div className="embed-placeholder">
+        <Trash2 /> Este banco de dados está na lixeira.
+      </div>;
 
   const views = dbPage.views?.length ? dbPage.views : [{ id: "default", name: "Tabela", type: "table" as const, filters: [], sorts: [] }];
   const view = views.find((v) => v.id === active) ?? views[0];
@@ -253,7 +265,7 @@ export function DatabaseView({ databaseId, inline }: { databaseId: string; inlin
             onBlur={(e) => e.target.value !== dbPage.title && updatePage(dbPage.id, { title: e.target.value })}
           />
           <button className="topbar-btn" title="Abrir como página inteira" onClick={() => navigate(dbPage.id)}>
-            ↗
+            <ArrowUpRight />
           </button>
         </div>
       )}
@@ -266,12 +278,12 @@ export function DatabaseView({ databaseId, inline }: { databaseId: string; inlin
               onClick={(e) => (v.id === view.id ? setPanel({ kind: "settings", anchor: e.currentTarget }) : select(v.id))}
               title={v.id === view.id ? "Clique para configurar esta visão" : undefined}
             >
-              <span>{VIEW_LABELS[v.type].icon}</span>
+              {VIEW_ICONS[v.type]}
               {v.name}
             </button>
           ))}
           <button className="db-tab" title="Adicionar visão" onClick={(e) => setPanel({ kind: "add", anchor: e.currentTarget })}>
-            ＋
+            <Plus />
           </button>
         </div>
         <div className="db-tools">
@@ -290,7 +302,7 @@ export function DatabaseView({ databaseId, inline }: { databaseId: string; inlin
             Ordenar{view.sorts.length ? ` (${view.sorts.length})` : ""}
           </button>
           <button className="topbar-btn" title="Configurar visão" onClick={(e) => setPanel({ kind: "settings", anchor: e.currentTarget })}>
-            ⚙
+            <Settings />
           </button>
           <button className="btn primary" style={{ padding: "3px 10px" }} onClick={add}>
             Novo
@@ -333,7 +345,7 @@ export function DatabaseView({ databaseId, inline }: { databaseId: string; inlin
             { heading: "Nova visão" },
             ...(Object.keys(VIEW_LABELS) as ViewType[]).map((t) => ({
               label: VIEW_LABELS[t].label,
-              icon: VIEW_LABELS[t].icon,
+              icon: VIEW_ICONS[t],
               onClick: async () => select(await addView(dbPage.id, t)),
             })),
           ]}

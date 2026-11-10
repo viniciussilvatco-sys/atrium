@@ -4,8 +4,8 @@ import { usePage } from "../db/hooks";
 import { PropertyCell } from "./PropertyCell";
 import { PropertyMenu, PropTypePicker } from "./PropertyMenu";
 import { addProperty } from "./actions";
-import { PROP_TYPE_LABELS } from "./query";
 import type { Anchor } from "../components/ui";
+import { Plus, PROP_TYPE_ICONS } from "../components/icons";
 
 /** Propriedades de uma linha de banco de dados, mostradas no topo da página da linha. */
 export function PropertiesPanel({ row }: { row: Page }) {
@@ -21,7 +21,7 @@ export function PropertiesPanel({ row }: { row: Page }) {
       {schema.map((d) => (
         <div key={d.id} className="prop-row">
           <button className="prop-name th-btn" style={{ width: 160, minHeight: 0 }} onClick={(e) => setMenu({ def: d, anchor: e.currentTarget })}>
-            <span>{PROP_TYPE_LABELS[d.type].icon}</span>
+            {PROP_TYPE_ICONS[d.type]}
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</span>
           </button>
           <div className="prop-value">
@@ -30,7 +30,7 @@ export function PropertiesPanel({ row }: { row: Page }) {
         </div>
       ))}
       <button className="ghost-btn" onClick={(e) => setAddAnchor(e.currentTarget)}>
-        ＋ Adicionar propriedade
+        <Plus /> Adicionar propriedade
       </button>
       {menu && <PropertyMenu dbPage={dbPage} def={menu.def} view={view} anchor={menu.anchor} onClose={() => setMenu(null)} />}
       {addAnchor && <PropTypePicker anchor={addAnchor} onClose={() => setAddAnchor(null)} onPick={(t) => addProperty(dbPage.id, t)} />}

@@ -4,6 +4,7 @@ import { updatePage } from "../db/repo";
 import { storeFile, useResolvedUrl } from "../editor/assets";
 import { EmojiPicker, RANDOM_ICONS } from "./EmojiPicker";
 import { Popover, type Anchor } from "./ui";
+import { ImagePlus, Smile, Upload, X } from "./icons";
 
 export const COVER_PRESETS = [
   "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
@@ -42,7 +43,10 @@ function CoverPicker({ page, anchor, onClose }: { page: Page; anchor: Anchor; on
       </div>
       <div className="menu-label">Imagem</div>
       <button className="menu-item" onClick={() => input.current?.click()}>
-        <span className="mi-icon">⬆</span> Enviar imagem do dispositivo
+        <span className="mi-icon">
+          <Upload />
+        </span>{" "}
+        Enviar imagem do dispositivo
       </button>
       <input
         ref={input}
@@ -62,7 +66,10 @@ function CoverPicker({ page, anchor, onClose }: { page: Page; anchor: Anchor; on
       </div>
       {page.cover && (
         <button className="menu-item danger" onClick={() => set(null)}>
-          <span className="mi-icon">✕</span> Remover capa
+          <span className="mi-icon">
+            <X />
+          </span>{" "}
+          Remover capa
         </button>
       )}
     </Popover>
@@ -167,12 +174,12 @@ export function PageHeader({ page, editable, onTitleEnter }: { page: Page; edita
                   className="ghost-btn"
                   onClick={() => updatePage(page.id, { icon: RANDOM_ICONS[Math.floor(Math.random() * RANDOM_ICONS.length)] })}
                 >
-                  ☺ Adicionar ícone
+                  <Smile /> Adicionar ícone
                 </button>
               )}
               {!page.cover && (
                 <button className="ghost-btn" onClick={(e) => setCoverAnchor(e.currentTarget)}>
-                  🖼 Adicionar capa
+                  <ImagePlus /> Adicionar capa
                 </button>
               )}
             </div>

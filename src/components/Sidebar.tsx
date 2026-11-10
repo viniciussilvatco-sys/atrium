@@ -9,6 +9,7 @@ import { mobileSidebarStore, navigate, openModal, routeStore, sidebarStore, useS
 import { ProfileSwitcher } from "./ProfileSwitcher";
 import { PageTree, openPage } from "./PageTree";
 import { pageTitle, timeAgo } from "./ui";
+import { FileText, House, LayoutTemplate, Plus, RefreshCw, Search, Settings, Trash2 } from "./icons";
 
 const SYNC_LABELS: Record<SyncStatus["state"], string> = {
   disconnected: "Somente neste aparelho",
@@ -46,7 +47,9 @@ function SyncIndicator() {
         {s.state === "idle" && s.lastSync ? ` · ${timeAgo(s.lastSync)}` : ""}
         {s.pending > 0 && s.state !== "pending" && s.state !== "disconnected" ? ` (${s.pending})` : ""}
       </span>
-      {s.state !== "disconnected" && <span title="Sincronizar agora">⟳</span>}
+      {s.state !== "disconnected" && <span className="sync-now" title="Sincronizar agora">
+          <RefreshCw />
+        </span>}
     </div>
   );
 }
@@ -93,9 +96,11 @@ export function Sidebar({ profiles, profile }: { profiles: Profile[]; profile: P
       <aside className={`sidebar${mobileOpen ? " mobile-open" : ""}`} style={{ width }}>
         <ProfileSwitcher profiles={profiles} current={profile} />
         <div className="side-item" onClick={() => openModal("search")}>
-          <span className="icon">🔍</span>
+          <span className="icon">
+            <Search />
+          </span>
           <span className="label">Buscar</span>
-          <span className="faint">Ctrl+K</span>
+          <span className="kbd">Ctrl K</span>
         </div>
         <div
           className={`side-item${!activeId ? " active" : ""}`}
@@ -104,19 +109,27 @@ export function Sidebar({ profiles, profile }: { profiles: Profile[]; profile: P
             mobileSidebarStore.set(false);
           }}
         >
-          <span className="icon">🏠</span>
+          <span className="icon">
+            <House />
+          </span>
           <span className="label">Início</span>
         </div>
         <div className="side-item" onClick={() => openModal("templates")}>
-          <span className="icon">🧩</span>
+          <span className="icon">
+            <LayoutTemplate />
+          </span>
           <span className="label">Templates</span>
         </div>
         <div className="side-item" onClick={() => openModal("settings")}>
-          <span className="icon">⚙️</span>
+          <span className="icon">
+            <Settings />
+          </span>
           <span className="label">Configurações</span>
         </div>
         <div className="side-item" onClick={newPage}>
-          <span className="icon">＋</span>
+          <span className="icon">
+            <Plus />
+          </span>
           <span className="label">Nova página</span>
         </div>
 
@@ -126,7 +139,7 @@ export function Sidebar({ profiles, profile }: { profiles: Profile[]; profile: P
               <div className="sidebar-section-title">Favoritos</div>
               {favorites.map((p) => (
                 <div key={p.id} className={`side-item${activeId === p.id ? " active" : ""}`} onClick={() => openPage(p.id)}>
-                  <span className="icon">{p.icon || "📄"}</span>
+                  <span className="icon">{p.icon || <FileText />}</span>
                   <span className="label">{pageTitle(p)}</span>
                 </div>
               ))}
@@ -135,14 +148,16 @@ export function Sidebar({ profiles, profile }: { profiles: Profile[]; profile: P
           <div className="sidebar-section-title">
             <span>Páginas</span>
             <button onClick={newPage} title="Nova página">
-              ＋
+              <Plus />
             </button>
           </div>
           {pages ? <PageTree pages={pages} activeId={activeId} profiles={profiles} /> : null}
         </div>
 
         <div className="side-item" onClick={() => openModal("trash")} style={{ marginBottom: 4 }}>
-          <span className="icon">🗑️</span>
+          <span className="icon">
+            <Trash2 />
+          </span>
           <span className="label">Lixeira</span>
         </div>
         <SyncIndicator />

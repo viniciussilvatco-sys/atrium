@@ -3,6 +3,7 @@ import { navigate } from "../lib/store";
 import { pageTitle } from "../components/ui";
 import { Tag } from "./PropertyCell";
 import { formatValue } from "./query";
+import { FileText, Plus } from "../components/icons";
 
 export function ListView({ dbPage, view, rows, onAdd }: { dbPage: Page; view: DbView; rows: Page[]; onAdd: () => void }) {
   const props = (dbPage.dbSchema ?? []).filter((d) => !view.hiddenProps?.includes(d.id));
@@ -10,7 +11,7 @@ export function ListView({ dbPage, view, rows, onAdd }: { dbPage: Page; view: Db
     <div>
       {rows.map((r) => (
         <div key={r.id} className="list-row" style={{ cursor: "pointer" }} onClick={() => navigate(r.id)}>
-          <span>{r.icon || "📄"}</span>
+          <span className="icon">{r.icon || <FileText />}</span>
           <span className="grow" style={{ fontWeight: 500 }}>
             {pageTitle(r)}
           </span>
@@ -35,7 +36,7 @@ export function ListView({ dbPage, view, rows, onAdd }: { dbPage: Page; view: Db
         </div>
       ))}
       <button className="add-row" style={{ border: "none" }} onClick={onAdd}>
-        ＋ Novo
+        <Plus /> Novo
       </button>
     </div>
   );

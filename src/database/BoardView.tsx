@@ -5,6 +5,7 @@ import { pageTitle } from "../components/ui";
 import { Tag } from "./PropertyCell";
 import { addOption, createRowForView, setRowProp, updateView } from "./actions";
 import { formatValue } from "./query";
+import { Plus } from "../components/icons";
 
 function Card({ row, dbPage, view }: { row: Page; dbPage: Page; view: DbView }) {
   const props = (dbPage.dbSchema ?? []).filter((d) => d.id !== view.groupBy && !view.hiddenProps?.includes(d.id));
@@ -105,7 +106,7 @@ export function BoardView({ dbPage, view, rows }: { dbPage: Page; view: DbView; 
               style={{ border: "none", borderRadius: 6 }}
               onClick={() => createRowForView(dbPage, view, key === "__none" ? {} : { [groupDef.id]: key })}
             >
-              ＋ Novo
+              <Plus /> Novo
             </button>
           </div>
         );
@@ -113,7 +114,7 @@ export function BoardView({ dbPage, view, rows }: { dbPage: Page; view: DbView; 
       <div className="board-col">
         {newGroup === null ? (
           <button className="add-row" style={{ border: "none" }} onClick={() => setNewGroup("")}>
-            ＋ Novo grupo
+            <Plus /> Novo grupo
           </button>
         ) : (
           <input

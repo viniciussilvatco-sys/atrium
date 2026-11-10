@@ -7,6 +7,7 @@ import { saveAsTemplate } from "../templates/builtin";
 import { mobileSidebarStore, navigate, openModal, sidebarStore } from "../lib/store";
 import { pageMenuItems } from "./PageTree";
 import { Menu, pageTitle, timeAgo, toast, type Anchor } from "./ui";
+import { Download, Ellipsis, LayoutTemplate, Menu as MenuIcon, MoveHorizontal, Printer, Star, TriangleAlert } from "./icons";
 
 function toggleSidebar() {
   if (window.matchMedia("(max-width: 768px)").matches) mobileSidebarStore.set(!mobileSidebarStore.get());
@@ -23,7 +24,7 @@ export function Topbar({ page, profile, profiles }: { page: Page | undefined; pr
   return (
     <div className="topbar">
       <button className="topbar-btn" onClick={toggleSidebar} title="Mostrar/ocultar barra lateral (Ctrl+\)" aria-label="Menu">
-        ☰
+        <MenuIcon />
       </button>
       <div className="breadcrumbs">
         {profile && (
@@ -53,10 +54,10 @@ export function Topbar({ page, profile, profiles }: { page: Page | undefined; pr
             onClick={() => updatePage(page.id, { favorite: !page.favorite })}
             style={page.favorite ? { color: "#d9a441" } : undefined}
           >
-            {page.favorite ? "★" : "☆"}
+            <Star fill={page.favorite ? "currentColor" : "none"} />
           </button>
           <button className="topbar-btn" onClick={(e) => setMenu(e.currentTarget)} title="Mais opções" aria-label="Mais opções">
-            ⋯
+            <Ellipsis />
           </button>
         </>
       )}
@@ -68,29 +69,29 @@ export function Topbar({ page, profile, profiles }: { page: Page | undefined; pr
           items={[
             {
               label: page.fullWidth ? "Largura padrão" : "Largura total",
-              icon: "↔",
+              icon: <MoveHorizontal />,
               onClick: () => updatePage(page.id, { fullWidth: !page.fullWidth }),
               hidden: page.kind === "database",
             },
             {
               label: "Exportar (Markdown .zip)",
-              icon: "⬇",
+              icon: <Download />,
               onClick: async () => {
                 toast("Gerando exportação…");
                 await exportPage(page.id);
               },
             },
-            { label: "Imprimir / salvar como PDF", icon: "🖨", onClick: () => setTimeout(() => window.print(), 50) },
+            { label: "Imprimir / salvar como PDF", icon: <Printer />, onClick: () => setTimeout(() => window.print(), 50) },
             {
               label: "Salvar como template",
-              icon: "🧩",
+              icon: <LayoutTemplate />,
               hidden: page.isTemplate,
               onClick: async () => {
                 await saveAsTemplate(page.id);
                 toast("Template salvo! Ele aparece em Templates e em páginas novas.");
               },
             },
-            { label: `Versões em conflito (${page.conflicts?.length ?? 0})`, icon: "⚠", hidden: !page.conflicts?.length, onClick: () => openModal("conflicts") },
+            { label: `Versões em conflito (${page.conflicts?.length ?? 0})`, icon: <TriangleAlert />, hidden: !page.conflicts?.length, onClick: () => openModal("conflicts") },
             { separator: true },
             ...pageMenuItems(page, profiles),
           ]}

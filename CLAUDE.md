@@ -45,6 +45,9 @@ npm run build      # tsc + vite build (gera dist/, PWA com service worker)
 - **Perfis** = espaços isolados (`profileId` em cada página). Templates são páginas com `isTemplate`.
 - **Exportação/backup:** `src/export/` (Markdown ZIP, JSON). **Importação do Notion:** `src/import/`
   (`notionParse.ts` puro e testado; `notionImport.ts` lê o ZIP, inclusive ZIPs aninhados).
+- **Visual:** cores/tamanhos são variáveis em `src/styles/theme.css` (`--radius-sm/--radius/--radius-lg`, `--shadow`,
+  `--accent-soft` para a página ativa). A área principal é um "cartão" sobre o fundo da barra lateral (no celular, tela cheia).
+  Ícones da interface vêm do Lucide via `src/components/icons.tsx` (tamanho pelo CSS `.lucide`); emojis só para as páginas do usuário.
 - Estado de interface: stores simples em `src/lib/store.ts` (rota por hash `#/<pageId>`, tema, perfil atual, modais).
 
 ## Cuidados já aprendidos

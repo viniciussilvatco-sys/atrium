@@ -10,6 +10,7 @@ import { PropertiesPanel } from "../database/PropertiesPanel";
 import { BUILTIN_TEMPLATES, applyBuiltinToPage, applyUserTemplateToPage } from "../templates/builtin";
 import { PageHeader } from "./PageHeader";
 import { confirmAction } from "./ui";
+import { Database, FileText, LayoutTemplate } from "./icons";
 
 export function isEmptyContent(content: unknown[]): boolean {
   if (!content || content.length === 0) return true;
@@ -26,7 +27,9 @@ function Starter({ page, onDismiss, onApplied }: { page: Page; onDismiss: () => 
   return (
     <div className="starter">
       <div className="starter-title">Pressione Enter para continuar com uma página vazia, ou comece com:</div>
-      <button onClick={onDismiss}>📄 Página vazia</button>
+      <button onClick={onDismiss}>
+        <FileText /> Página vazia
+      </button>
       {builtinPages.map((t) => (
         <button key={t.id} onClick={run(() => applyBuiltinToPage(t, page))}>
           {t.icon} {t.name}
@@ -38,14 +41,16 @@ function Starter({ page, onDismiss, onApplied }: { page: Page; onDismiss: () => 
         </button>
       ))}
       <button onClick={() => updatePage(page.id, { kind: "database", icon: page.icon || "🗂️", ...defaultDatabaseSchema() })}>
-        🗂️ Banco de dados vazio
+        <Database /> Banco de dados vazio
       </button>
       {builtinDbs.map((t) => (
         <button key={t.id} onClick={run(() => applyBuiltinToPage(t, page))}>
           {t.icon} {t.name}
         </button>
       ))}
-      <button onClick={() => openModal("templates")}>🧩 Ver todos os templates…</button>
+      <button onClick={() => openModal("templates")}>
+        <LayoutTemplate /> Ver todos os templates…
+      </button>
     </div>
   );
 }

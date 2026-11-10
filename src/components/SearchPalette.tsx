@@ -6,6 +6,7 @@ import type { Page, Profile } from "../db/types";
 import { currentProfileStore } from "../lib/store";
 import { openPage } from "./PageTree";
 import { Modal, pageTitle } from "./ui";
+import { Database, FileText } from "./icons";
 
 const normalize = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -105,7 +106,7 @@ export function SearchPalette({ onClose, profiles }: { onClose: () => void; prof
           const prof = profileOf(page.profileId);
           return (
             <div key={page.id} className={`search-result${i === selected ? " selected" : ""}`} onMouseEnter={() => setSelected(i)} onClick={() => go(page)}>
-              <span style={{ fontSize: 18 }}>{page.icon || (page.kind === "database" ? "🗂️" : "📄")}</span>
+              <span className="sr-icon">{page.icon || (page.kind === "database" ? <Database /> : <FileText />)}</span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div className="sr-title">
                   {pageTitle(page)}

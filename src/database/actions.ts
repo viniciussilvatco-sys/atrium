@@ -132,11 +132,11 @@ export async function updateView(dbId: string, viewId: string, patch: Partial<Db
   await patchDb(dbId, (p) => ({ views: (p.views ?? []).map((v) => (v.id === viewId ? { ...v, ...patch } : v)) }));
 }
 
-export const VIEW_LABELS: Record<ViewType, { label: string; icon: string }> = {
-  table: { label: "Tabela", icon: "▦" },
-  board: { label: "Quadro", icon: "▥" },
-  calendar: { label: "Calendário", icon: "📅" },
-  list: { label: "Lista", icon: "☰" },
+export const VIEW_LABELS: Record<ViewType, { label: string }> = {
+  table: { label: "Tabela" },
+  board: { label: "Quadro" },
+  calendar: { label: "Calendário" },
+  list: { label: "Lista" },
 };
 
 export async function addView(dbId: string, type: ViewType): Promise<string> {

@@ -12,6 +12,7 @@ import { importNotionZip, type ImportResult } from "../import/notionImport";
 import { installPrompt } from "../lib/install";
 import { useSyncStatus } from "./Sidebar";
 import { Modal, confirmAction, timeAgo, toast } from "./ui";
+import { ChevronRight, Cloud, FileUp, HardDrive, Monitor, Moon, Package, Palette, RefreshCw, Smartphone, Sun } from "./icons";
 
 function fmtBytes(n: number) {
   if (n < 1024) return `${n} B`;
@@ -48,7 +49,9 @@ function GoogleSection() {
 
   return (
     <div className="settings-section">
-      <h3>☁️ Sincronização com Google Drive</h3>
+      <h3>
+        <Cloud /> Sincronização com Google Drive
+      </h3>
       <p>
         Suas páginas ficam numa pasta oculta e exclusiva do Atrium no seu Google Drive. Conecte a mesma conta Google em cada aparelho (PC, celular…)
         para manter tudo sincronizado. Sem conexão, tudo continua salvo neste aparelho.
@@ -83,7 +86,7 @@ function GoogleSection() {
               </button>
             )}
             <button className="btn" onClick={() => syncNow()} disabled={status.state === "syncing"}>
-              ⟳ Sincronizar agora
+              <RefreshCw /> Sincronizar agora
             </button>
             <button
               className="btn"
@@ -100,7 +103,7 @@ function GoogleSection() {
       )}
       <div style={{ marginTop: 12 }}>
         <button className="ghost-btn" style={{ padding: "2px 0" }} onClick={() => setShowAdvanced(!showAdvanced)}>
-          {showAdvanced ? "▾" : "▸"} Avançado: ID do cliente Google
+          <ChevronRight className={`chevron${showAdvanced ? " open" : ""}`} /> Avançado: ID do cliente Google
         </button>
         {showAdvanced && (
           <div className="row" style={{ marginTop: 6, flexWrap: "nowrap" }}>
@@ -151,7 +154,9 @@ function NotionImportSection({ profile, onDone }: { profile: Profile | undefined
 
   return (
     <div className="settings-section">
-      <h3>📥 Importar do Notion</h3>
+      <h3>
+        <FileUp /> Importar do Notion
+      </h3>
       <p>
         No Notion, vá em <b>Configurações → Geral (ou Workspace) → Exportar todo o conteúdo do espaço de trabalho</b>, escolha o formato{" "}
         <b>Markdown &amp; CSV</b> e <b>Incluir conteúdo: Tudo</b>. Você recebe um arquivo <b>.zip</b> (por download ou e-mail) — escolha-o aqui. Também
@@ -219,7 +224,9 @@ function InstallSection() {
   const standalone = window.matchMedia("(display-mode: standalone)").matches;
   return (
     <div className="settings-section">
-      <h3>📲 Instalar o app</h3>
+      <h3>
+        <Smartphone /> Instalar o app
+      </h3>
       {standalone ? (
         <p>O Atrium já está instalado neste aparelho. ✓</p>
       ) : prompt ? (
@@ -274,24 +281,28 @@ export function SettingsModal({ profile, onClose }: { profile: Profile | undefin
       <GoogleSection />
 
       <div className="settings-section">
-        <h3>🎨 Aparência</h3>
+        <h3>
+          <Palette /> Aparência
+        </h3>
         <div className="seg">
           {(
             [
-              ["light", "☀️ Claro"],
-              ["dark", "🌙 Escuro"],
-              ["system", "💻 Sistema"],
-            ] as [ThemePref, string][]
-          ).map(([v, label]) => (
+              ["light", <Sun key="i" />, "Claro"],
+              ["dark", <Moon key="i" />, "Escuro"],
+              ["system", <Monitor key="i" />, "Sistema"],
+            ] as [ThemePref, React.ReactNode, string][]
+          ).map(([v, ic, label]) => (
             <button key={v} className={theme === v ? "on" : ""} onClick={() => themeStore.set(v)}>
-              {label}
+              {ic} {label}
             </button>
           ))}
         </div>
       </div>
 
       <div className="settings-section">
-        <h3>📦 Exportar e backup</h3>
+        <h3>
+          <Package /> Exportar e backup
+        </h3>
         <p>Exporte suas anotações em Markdown (abre em qualquer editor) ou faça um backup completo para restaurar depois.</p>
         <div className="row">
           {profile && (
@@ -328,7 +339,9 @@ export function SettingsModal({ profile, onClose }: { profile: Profile | undefin
       <InstallSection />
 
       <div className="settings-section">
-        <h3>💾 Armazenamento neste aparelho</h3>
+        <h3>
+          <HardDrive /> Armazenamento neste aparelho
+        </h3>
         {stats && (
           <p>
             {stats.pages} páginas · {stats.assets} arquivos ({fmtBytes(stats.bytes)})

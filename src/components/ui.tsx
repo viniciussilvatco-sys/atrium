@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Emitter } from "../lib/events";
+import { X } from "lucide-react";
 
 // ---------- Popover ancorado a um elemento ou ponto ----------
 
@@ -162,7 +163,7 @@ export function Modal({
           <div className="modal-head">
             <span>{title}</span>
             <button className="icon-btn" onClick={onClose} aria-label="Fechar">
-              ✕
+              <X />
             </button>
           </div>
         )}

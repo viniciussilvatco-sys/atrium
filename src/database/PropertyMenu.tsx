@@ -3,6 +3,7 @@ import type { DbView, Page, PropDef, PropType } from "../db/types";
 import { Popover, confirmAction, type Anchor } from "../components/ui";
 import { changePropertyType, deleteProperty, updateProperty, updateView } from "./actions";
 import { PROP_TYPE_LABELS } from "./query";
+import { ArrowDown, ArrowUp, EyeOff, PROP_TYPE_ICONS, Trash2 } from "../components/icons";
 
 export const PROP_TYPES = Object.keys(PROP_TYPE_LABELS) as PropType[];
 
@@ -19,7 +20,7 @@ export function PropTypePicker({ anchor, onPick, onClose }: { anchor: Anchor; on
             onPick(t);
           }}
         >
-          <span className="mi-icon">{PROP_TYPE_LABELS[t].icon}</span>
+          <span className="mi-icon">{PROP_TYPE_ICONS[t]}</span>
           {PROP_TYPE_LABELS[t].label}
         </button>
       ))}
@@ -71,7 +72,7 @@ export function PropertyMenu({
             }}
           />
           <button className="menu-item" onClick={(e) => setTypeAnchor(e.currentTarget)}>
-            <span className="mi-icon">{PROP_TYPE_LABELS[def.type].icon}</span>
+            <span className="mi-icon">{PROP_TYPE_ICONS[def.type]}</span>
             Tipo
             <span className="mi-hint">{PROP_TYPE_LABELS[def.type].label} ›</span>
           </button>
@@ -79,10 +80,16 @@ export function PropertyMenu({
         </>
       )}
       <button className="menu-item" onClick={() => sortBy("asc")}>
-        <span className="mi-icon">↑</span> Ordenar crescente
+        <span className="mi-icon">
+          <ArrowUp />
+        </span>{" "}
+        Ordenar crescente
       </button>
       <button className="menu-item" onClick={() => sortBy("desc")}>
-        <span className="mi-icon">↓</span> Ordenar decrescente
+        <span className="mi-icon">
+          <ArrowDown />
+        </span>{" "}
+        Ordenar decrescente
       </button>
       {def && (
         <>
@@ -93,7 +100,10 @@ export function PropertyMenu({
               onClose();
             }}
           >
-            <span className="mi-icon">👁</span> Ocultar nesta visão
+            <span className="mi-icon">
+          <EyeOff />
+        </span>{" "}
+        Ocultar nesta visão
           </button>
           <div className="menu-sep" />
           <button
@@ -103,7 +113,10 @@ export function PropertyMenu({
               onClose();
             }}
           >
-            <span className="mi-icon">🗑</span> Excluir propriedade
+            <span className="mi-icon">
+          <Trash2 />
+        </span>{" "}
+        Excluir propriedade
           </button>
         </>
       )}

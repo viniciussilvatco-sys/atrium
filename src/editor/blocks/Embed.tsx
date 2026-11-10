@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { createReactBlockSpec } from "@blocknote/react";
 import { toEmbedUrl } from "../../lib/embed";
+import { Link } from "lucide-react";
 
 function UrlPrompt({ placeholder, onSubmit }: { placeholder: string; onSubmit: (url: string) => void }) {
   const [url, setUrl] = useState("");
   return (
     <div className="embed-placeholder" onKeyDown={(e) => e.stopPropagation()} onPaste={(e) => e.stopPropagation()}>
-      <span>🔗</span>
+      <Link />
       <input
         className="input"
         placeholder={placeholder}

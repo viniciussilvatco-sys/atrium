@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import katex from "katex";
 import { createReactBlockSpec } from "@blocknote/react";
+import { Sigma } from "lucide-react";
 
 export function renderLatex(latex: string, displayMode = true): { html: string; error: string | null } {
   try {
@@ -52,7 +53,9 @@ function MathView({ latex, editable, onSave }: { latex: string; editable: boolea
       }}
     >
       {!latex ? (
-        <div className="math-empty">∑ Clique para adicionar uma fórmula</div>
+        <div className="math-empty">
+          <Sigma /> Clique para adicionar uma fórmula
+        </div>
       ) : preview.error ? (
         <div className="math-error">{preview.error}</div>
       ) : (

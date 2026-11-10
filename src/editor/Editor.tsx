@@ -20,6 +20,7 @@ import { db } from "../db/schema";
 import { createDatabase, createPage, updatePage } from "../db/repo";
 import { effectiveThemeStore, navigate, useStore } from "../lib/store";
 import { pageTitle } from "../components/ui";
+import { Clapperboard, Database, FilePlus, FileText, Lightbulb, Sigma } from "lucide-react";
 
 const dictionary = {
   ...pt,
@@ -30,7 +31,7 @@ const dictionary = {
   },
 };
 
-const icon = (s: string) => <span style={{ fontSize: 18, width: 18, textAlign: "center" }}>{s}</span>;
+const icon = (s: ReactNode) => <span className="slash-icon">{s}</span>;
 
 function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise<void>): DefaultReactSuggestionItem[] {
   const group = "Atrium";
@@ -40,7 +41,7 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       subtext: "Cria uma subpágina dentro desta",
       aliases: ["pagina", "subpagina", "page", "subpage"],
       group,
-      icon: icon("📄"),
+      icon: icon(<FileText />),
       onItemClick: async () => {
         const child = await createPage({ profileId: page.profileId, parentId: page.id });
         insertOrUpdateBlockForSlashMenu(editor, { type: "subpage", props: { pageId: child.id } } as AtriumPartialBlock);
@@ -53,7 +54,7 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       subtext: "Tabela, quadro Kanban e calendário",
       aliases: ["banco", "database", "tabela", "kanban", "quadro", "calendario", "db"],
       group,
-      icon: icon("🗂️"),
+      icon: icon(<Database />),
       onItemClick: async () => {
         const dbPage = await createDatabase(page.profileId, page.id);
         insertOrUpdateBlockForSlashMenu(editor, { type: "database", props: { databaseId: dbPage.id } } as AtriumPartialBlock);
@@ -64,7 +65,7 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       subtext: "Caixa com ícone para chamar atenção",
       aliases: ["callout", "destaque", "aviso", "nota", "dica"],
       group,
-      icon: icon("💡"),
+      icon: icon(<Lightbulb />),
       onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "callout" } as AtriumPartialBlock),
     },
     {
@@ -72,7 +73,7 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       subtext: "Equação matemática em bloco",
       aliases: ["math", "latex", "formula", "equacao", "katex"],
       group,
-      icon: icon("∑"),
+      icon: icon(<Sigma />),
       onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "math" } as AtriumPartialBlock),
     },
     {
@@ -80,7 +81,7 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       subtext: "YouTube, Vimeo, Spotify, Google Docs, Figma…",
       aliases: ["embed", "incorporar", "youtube", "video", "iframe", "spotify"],
       group,
-      icon: icon("🎬"),
+      icon: icon(<Clapperboard />),
       onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "embed" } as AtriumPartialBlock),
     },
     {
@@ -88,7 +89,7 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       subtext: "Visualizar um PDF dentro da página",
       aliases: ["pdf", "documento"],
       group,
-      icon: icon("📕"),
+      icon: icon(<FileText />),
       onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "pdf" } as AtriumPartialBlock),
     },
   ];
@@ -115,7 +116,7 @@ async function mentionItems(editor: AtriumEditor, page: Page, query: string): Pr
     items.push({
       title: `Nova página "${query.trim()}"`,
       subtext: "Cria uma subpágina e insere o link",
-      icon: icon("➕"),
+      icon: icon(<FilePlus />),
       group: "Criar",
       onItemClick: async () => {
         const child = await createPage({ profileId: page.profileId, parentId: page.id, title: query.trim() });

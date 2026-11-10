@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { createReactBlockSpec } from "@blocknote/react";
 import { useResolvedUrl } from "../assets";
+import { FileText } from "lucide-react";
 
 function PdfView({ url, name }: { url: string; name: string }) {
   const resolved = useResolvedUrl(url);
@@ -9,7 +10,7 @@ function PdfView({ url, name }: { url: string; name: string }) {
     <div className="embed-block">
       <iframe className="pdf-frame" src={resolved} title={name || "PDF"} />
       <div className="faint" style={{ marginTop: 4 }}>
-        📄 {name || "documento.pdf"} ·{" "}
+        <FileText className="tiny" /> {name || "documento.pdf"} ·{" "}
         <a href={resolved} target="_blank" rel="noreferrer" download={name || "documento.pdf"}>
           abrir / baixar
         </a>
@@ -23,7 +24,7 @@ function PdfUpload({ onFile }: { onFile: (f: File) => Promise<void> }) {
   const [busy, setBusy] = useState(false);
   return (
     <div className="embed-placeholder">
-      <span>📄</span>
+      <FileText />
       <span style={{ flex: 1 }}>Incorporar um PDF</span>
       <button className="btn primary" disabled={busy} onClick={() => input.current?.click()}>
         {busy ? "Enviando…" : "Escolher arquivo"}

@@ -3,6 +3,7 @@ import type { Page, Profile } from "../db/types";
 import { createDatabase, createPage, createRow, duplicatePage, movePage, trashPage, updatePage } from "../db/repo";
 import { mobileSidebarStore, navigate, openMove, sidebarStore, useStore } from "../lib/store";
 import { Menu, pageTitle, toast, type Anchor, type MenuEntry } from "./ui";
+import { ChevronRight, Copy, Database, Ellipsis, FileText, FolderInput, Link, Pencil, Plus, Star, StarOff, Trash2 } from "./icons";
 
 let dragId: string | null = null;
 
@@ -30,13 +31,13 @@ export function pageMenuItems(page: Page, profiles: Profile[], extra: { onRename
   return [
     {
       label: page.favorite ? "Remover dos favoritos" : "Adicionar aos favoritos",
-      icon: page.favorite ? "☆" : "★",
+      icon: page.favorite ? <StarOff /> : <Star />,
       onClick: () => updatePage(page.id, { favorite: !page.favorite }),
     },
-    { label: "Renomear", icon: "✎", onClick: extra.onRename, hidden: !extra.onRename },
+    { label: "Renomear", icon: <Pencil />, onClick: extra.onRename, hidden: !extra.onRename },
     {
       label: "Duplicar",
-      icon: "⧉",
+      icon: <Copy />,
       onClick: async () => {
         const copy = await duplicatePage(page.id);
         if (copy) openPage(copy.id);
@@ -44,7 +45,7 @@ export function pageMenuItems(page: Page, profiles: Profile[], extra: { onRename
     },
     {
       label: "Copiar link",
-      icon: "🔗",
+      icon: <Link />,
       onClick: () => {
         navigator.clipboard?.writeText(`${location.origin}${location.pathname}#/${page.id}`);
         toast("Link copiado");
@@ -52,14 +53,14 @@ export function pageMenuItems(page: Page, profiles: Profile[], extra: { onRename
     },
     {
       label: profiles.length > 1 ? "Mover para… (outra página ou perfil)" : "Mover para dentro de outra página…",
-      icon: "↪",
+      icon: <FolderInput />,
       onClick: () => openMove(page.id),
       hidden: page.kind === "row",
     },
     { separator: true },
     {
       label: "Mover para a lixeira",
-      icon: "🗑",
+      icon: <Trash2 />,
       danger: true,
       onClick: async () => {
         await trashPage(page.id);
@@ -155,9 +156,9 @@ function TreeItem({
           }}
           aria-label={open ? "Recolher" : "Expandir"}
         >
-          <span className={`chevron${open ? " open" : ""}`}>▶</span>
+          <ChevronRight className={`chevron${open ? " open" : ""}`} />
         </button>
-        <span className="icon">{page.icon || (page.kind === "database" ? "🗂️" : "📄")}</span>
+        <span className="icon">{page.icon || (page.kind === "database" ? <Database /> : <FileText />)}</span>
         <span className="label">{pageTitle(page)}</span>
         <span className="actions">
           <button
@@ -168,7 +169,7 @@ function TreeItem({
               setMenu(e.currentTarget);
             }}
           >
-            ⋯
+            <Ellipsis />
           </button>
           <button
             className="icon-btn"
@@ -179,7 +180,7 @@ function TreeItem({
               else setAddMenu(e.currentTarget);
             }}
           >
-            ＋
+            <Plus />
           </button>
         </span>
       </div>
@@ -197,8 +198,8 @@ function TreeItem({
           anchor={addMenu}
           onClose={() => setAddMenu(null)}
           items={[
-            { label: "Subpágina", icon: "📄", onClick: () => addChild("page") },
-            { label: "Banco de dados", icon: "🗂️", onClick: () => addChild("database") },
+            { label: "Subpágina", icon: <FileText />, onClick: () => addChild("page") },
+            { label: "Banco de dados", icon: <Database />, onClick: () => addChild("database") },
           ]}
         />
       )}

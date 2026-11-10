@@ -6,6 +6,7 @@ import { openModal } from "../lib/store";
 import { BUILTIN_TEMPLATES, createFromBuiltin } from "../templates/builtin";
 import { openPage } from "./PageTree";
 import { pageTitle, timeAgo } from "./ui";
+import { Database, FileText, LayoutTemplate, Plus } from "./icons";
 
 function greeting() {
   const h = new Date().getHours();
@@ -41,7 +42,9 @@ export function Home({ profile }: { profile: Profile }) {
             openPage(p.id);
           }}
         >
-          <div className="big">＋</div>
+          <div className="big">
+            <Plus />
+          </div>
           <div className="t">Nova página</div>
           <div className="s">Página em branco</div>
         </button>
@@ -60,7 +63,9 @@ export function Home({ profile }: { profile: Profile }) {
           </button>
         ))}
         <button className="home-card" onClick={() => openModal("templates")}>
-          <div className="big">🧩</div>
+          <div className="big">
+            <LayoutTemplate />
+          </div>
           <div className="t">Mais templates</div>
           <div className="s">Reunião, projeto, tarefas…</div>
         </button>
@@ -72,7 +77,7 @@ export function Home({ profile }: { profile: Profile }) {
           <div className="home-grid">
             {recent.map((p) => (
               <button key={p.id} className="home-card" onClick={() => openPage(p.id)}>
-                <div className="big">{p.icon || (p.kind === "database" ? "🗂️" : "📄")}</div>
+                <div className="big">{p.icon || (p.kind === "database" ? <Database /> : <FileText />)}</div>
                 <div className="t">{pageTitle(p)}</div>
                 <div className="s">{timeAgo(p.updatedAt)}</div>
               </button>

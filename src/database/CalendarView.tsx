@@ -4,6 +4,7 @@ import { navigate } from "../lib/store";
 import { pageTitle } from "../components/ui";
 import { createRowForView, setRowProp, updateView } from "./actions";
 import { toIsoDate } from "./query";
+import { Plus } from "../components/icons";
 
 function monthLabel(d: Date) {
   const m = d.toLocaleDateString("pt-BR", { month: "long" });
@@ -102,7 +103,7 @@ export function CalendarView({ dbPage, view, rows }: { dbPage: Page; view: DbVie
               }}
             >
               <button className="icon-btn add" title="Novo item neste dia" onClick={() => createRowForView(dbPage, view, { [dateDef.id]: iso })}>
-                ＋
+                <Plus />
               </button>
               <div className="n">
                 <span>{d.getDate()}</span>

@@ -3,13 +3,14 @@ import { usePage } from "../../db/hooks";
 import { navigate } from "../../lib/store";
 import { pageTitle } from "../../components/ui";
 import { DatabaseView } from "../../database/DatabaseView";
+import { Database, FileText } from "lucide-react";
 
 function SubpageLink({ pageId }: { pageId: string }) {
   const page = usePage(pageId);
   const gone = page && (page.deleted || page.trashedAt !== null);
   return (
     <div className="subpage-block" contentEditable={false} onClick={() => !gone && navigate(pageId)}>
-      <span>{page?.icon || (page?.kind === "database" ? "🗂️" : "📄")}</span>
+      <span className="icon">{page?.icon || (page?.kind === "database" ? <Database /> : <FileText />)}</span>
       <span className="t" style={gone ? { textDecoration: "line-through", opacity: 0.5 } : undefined}>
         {page === undefined ? "…" : pageTitle(page)}
       </span>
