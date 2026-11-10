@@ -38,6 +38,26 @@ describe("nomes e caminhos do Notion", () => {
     expect(parents.get("Private & Shared/Curso abc/Aula 1 def/Detalhe ghi.md")).toBe("Private & Shared/Curso abc/Aula 1 def.md");
     expect(parents.get("Private & Shared/Solta jkl.md")).toBeNull();
   });
+
+  it("aceita pastas sem o id e acentos gravados de outro jeito (exportação nova do Notion)", () => {
+    const id1 = "0123456789abcdef0123456789abcdef";
+    const id2 = "fedcba9876543210fedcba9876543210";
+    const curso = `Export/Curso de informática ${id1}.md`;
+    const aula = `Export/${"Curso de informática".normalize("NFD")}/Aula 1 ${id2}.md`;
+    const detalhe = "Export/Curso de informática/Aula 1/Detalhe.md";
+    const parents = buildParents([curso, aula, detalhe]);
+    expect(parents.get(curso)).toBeNull();
+    expect(parents.get(aula)).toBe(curso);
+    expect(parents.get(detalhe)).toBe(aula);
+  });
+
+  it("com duas páginas de mesmo nome, escolhe a que tem link para a filha", () => {
+    const a = "X/Notas 0123456789abcdef0123456789abcdef.md";
+    const b = "X/Notas fedcba9876543210fedcba9876543210.md";
+    const filha = "X/Notas/Filha.md";
+    const texts = new Map([[a, "nada"], [b, "[Filha](Notas/Filha.md)"]]);
+    expect(buildParents([a, b, filha], texts).get(filha)).toBe(b);
+  });
 });
 
 describe("preprocessNotionMarkdown", () => {

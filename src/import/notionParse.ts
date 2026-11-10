@@ -65,15 +65,39 @@ export function safeDecode(s: string): string {
  * Descobre o pai de cada página: o arquivo "X.md" é pai dos arquivos dentro da pasta "X/".
  * Pastas sem página correspondente (ex.: "Private & Shared") são transparentes.
  */
-export function buildParents(pagePaths: string[]): Map<string, string | null> {
-  const byBase = new Set(pagePaths.map((p) => p.replace(/\.(md|csv)$/i, "")));
+/**
+ * Descobre a página "dona" de cada pasta. Aceita as variações das exportações do Notion:
+ * pasta com o mesmo nome do arquivo ("Curso abc…" ↔ "Curso abc….md"), pasta sem o id ("Curso" ↔ "Curso abc….md"),
+ * acentos gravados de formas diferentes (NFC/NFD) e espaços sobrando.
+ * Se houver mais de uma candidata, vence a página cujo texto tem link para a filha.
+ */
+export function buildParents(pagePaths: string[], texts?: Map<string, string>): Map<string, string | null> {
+  const norm = (s: string) => s.normalize("NFC").split("/").map((part) => part.trim()).join("/").toLowerCase();
+  const stripExt = (p: string) => p.replace(/(_all)?\.csv$/i, "").replace(/\.md$/i, "");
+  const exact = new Map<string, string[]>();
+  const byTitle = new Map<string, string[]>();
+  const add = (map: Map<string, string[]>, key: string, p: string) => map.set(key, [...(map.get(key) ?? []), p]);
+  for (const p of pagePaths) {
+    const base = stripExt(p);
+    add(exact, norm(base), p);
+    const titleKey = norm(`${dirname(base) ? dirname(base) + "/" : ""}${basename(base).replace(NOTION_ID, "")}`);
+    add(byTitle, titleKey, p);
+  }
+
+  const linksTo = (from: string, child: string) => {
+    const text = texts?.get(from);
+    if (!text) return false;
+    return localLinks(text).some((l) => norm(resolvePath(dirname(from), safeDecode(l.href))) === norm(child));
+  };
+
   const parents = new Map<string, string | null>();
   for (const path of pagePaths) {
     let dir = dirname(path);
     let parent: string | null = null;
     while (dir) {
-      if (byBase.has(dir)) {
-        parent = pagePaths.find((p) => p.replace(/\.(md|csv)$/i, "") === dir) ?? null;
+      const candidates = (exact.get(norm(dir)) ?? byTitle.get(norm(dir)) ?? []).filter((c) => c !== path);
+      if (candidates.length) {
+        parent = candidates.find((c) => linksTo(c, path)) ?? candidates[0];
         break;
       }
       dir = dirname(dir);

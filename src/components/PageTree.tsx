@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Page, Profile } from "../db/types";
 import { createDatabase, createPage, createRow, duplicatePage, movePage, trashPage, updatePage } from "../db/repo";
-import { mobileSidebarStore, navigate, sidebarStore, useStore } from "../lib/store";
+import { mobileSidebarStore, navigate, openMove, sidebarStore, useStore } from "../lib/store";
 import { Menu, pageTitle, toast, type Anchor, type MenuEntry } from "./ui";
 
 let dragId: string | null = null;
@@ -50,21 +50,12 @@ export function pageMenuItems(page: Page, profiles: Profile[], extra: { onRename
         toast("Link copiado");
       },
     },
-    ...(profiles.length > 1
-      ? [
-          { heading: "Mover para o perfil" } as MenuEntry,
-          ...profiles
-            .filter((p) => p.id !== page.profileId)
-            .map((p) => ({
-              label: p.name,
-              icon: p.icon,
-              onClick: async () => {
-                await movePage(page.id, { parentId: null, order: Date.now(), profileId: p.id });
-                toast(`Movida para ${p.name}`);
-              },
-            })),
-        ]
-      : []),
+    {
+      label: profiles.length > 1 ? "Mover para… (outra página ou perfil)" : "Mover para dentro de outra página…",
+      icon: "↪",
+      onClick: () => openMove(page.id),
+      hidden: page.kind === "row",
+    },
     { separator: true },
     {
       label: "Mover para a lixeira",

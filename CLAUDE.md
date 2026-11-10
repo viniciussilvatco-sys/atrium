@@ -54,7 +54,7 @@ npm run build      # tsc + vite build (gera dist/, PWA com service worker)
 
 ## Pendências conhecidas
 
-- Arrastar páginas/cartões com o dedo no celular é limitado (HTML5 drag and drop); não há alternativa por menu para
-  colocar uma página dentro de outra.
+- Arrastar páginas/cartões com o dedo no celular é limitado (HTML5 drag and drop); a alternativa é o menu ⋯ →
+  "Mover para…" (`MoveModal.tsx`), que também troca a página de perfil.
 - O atalho ``` não cria bloco de código no teste automatizado; `/código` funciona.
 - Ícones das páginas não vêm na importação do Notion (o Notion não os exporta).

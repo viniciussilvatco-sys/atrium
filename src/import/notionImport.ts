@@ -61,7 +61,7 @@ async function readEntries(file: Blob, onProgress: Progress): Promise<Map<string
       if (/\.zip$/i.test(entry.name)) {
         onProgress(`Abrindo ${basename(entry.name)}…`);
         await visit(await entry.async("arraybuffer"), prefix);
-      } else entries.set(prefix + entry.name, entry);
+      } else entries.set(prefix + entry.name.replace(/\\/g, "/"), entry);
     }
   };
   await visit(file, "");
@@ -81,7 +81,6 @@ export async function importNotionZip(file: File, profileId: string, onProgress:
     const m = /([0-9a-f]{32})\.(md|csv)$/i.exec(p);
     if (m) byNotionId.set(m[1].toLowerCase(), pageIds.get(p)!);
   }
-  const parents = buildParents(pagePaths);
   const titles = new Map(pagePaths.map((p) => [p, parseNotionName(basename(p)).title]));
   const warnings: string[] = [];
 
@@ -95,6 +94,7 @@ export async function importNotionZip(file: File, profileId: string, onProgress:
   const assetByPath = new Map<string, { id: string; name: string; mime: string }>();
   const texts = new Map<string, string>();
   for (const p of pagePaths) texts.set(p, await entries.get(textSource.get(p) ?? p)!.async("string"));
+  const parents = buildParents(pagePaths, texts);
 
   const toUpload: { path: string; pageId: string }[] = [];
   for (const p of pagePaths) {

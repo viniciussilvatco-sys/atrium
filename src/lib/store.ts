@@ -112,3 +112,10 @@ export function openModal(name: ModalName) {
   modalStore.set(name);
   mobileSidebarStore.set(false);
 }
+
+/** Página que está sendo movida (abre a janela "Mover para…"). */
+export const moveStore = createStore<string | null>(null);
+export function openMove(pageId: string) {
+  moveStore.set(pageId);
+  mobileSidebarStore.set(false);
+}

@@ -5,6 +5,7 @@ import {
   currentProfileStore,
   effectiveThemeStore,
   modalStore,
+  moveStore,
   openModal,
   routeStore,
   sidebarStore,
@@ -19,6 +20,7 @@ import { SearchPalette } from "./components/SearchPalette";
 import { SettingsModal } from "./components/SettingsModal";
 import { ConflictsModal, TemplatesModal, TrashModal } from "./components/Modals";
 import { ToastHost } from "./components/ui";
+import { MoveModal } from "./components/MoveModal";
 import { useSyncStatus } from "./components/Sidebar";
 
 export default function App() {
@@ -26,6 +28,7 @@ export default function App() {
   const currentId = useStore(currentProfileStore);
   const route = useStore(routeStore);
   const modal = useStore(modalStore);
+  const moving = useStore(moveStore);
   const theme = useStore(effectiveThemeStore);
   const { collapsed } = useStore(sidebarStore);
   const routePage = usePage(route);
@@ -99,6 +102,7 @@ export default function App() {
       {modal === "trash" && <TrashModal profile={profile} onClose={close} />}
       {modal === "templates" && <TemplatesModal profile={profile} onClose={close} />}
       {modal === "conflicts" && route && <ConflictsModal pageId={route} onClose={close} />}
+      {moving && <MoveModal pageId={moving} profiles={profiles ?? []} onClose={() => moveStore.set(null)} />}
       <ToastHost />
     </div>
   );

@@ -3,3 +3,6 @@ dist
 .env
 .env.local
 *.log
+
+# Exportações/backup com anotações pessoais — nunca publicar
+*.zip
