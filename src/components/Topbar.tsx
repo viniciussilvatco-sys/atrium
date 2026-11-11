@@ -7,7 +7,7 @@ import { saveAsTemplate } from "../templates/builtin";
 import { mobileSidebarStore, navigate, openModal, sidebarStore } from "../lib/store";
 import { pageMenuItems } from "./PageTree";
 import { Menu, pageTitle, timeAgo, toast, type Anchor } from "./ui";
-import { Download, Ellipsis, LayoutTemplate, Menu as MenuIcon, MoveHorizontal, Printer, Star, TriangleAlert } from "./icons";
+import { Download, Ellipsis, History, LayoutTemplate, Menu as MenuIcon, MoveHorizontal, Printer, Star, TriangleAlert } from "./icons";
 
 function toggleSidebar() {
   if (window.matchMedia("(max-width: 768px)").matches) mobileSidebarStore.set(!mobileSidebarStore.get());
@@ -91,6 +91,7 @@ export function Topbar({ page, profile, profiles }: { page: Page | undefined; pr
                 toast("Template salvo! Ele aparece em Templates e em páginas novas.");
               },
             },
+            { label: "Histórico de versões", icon: <History />, hidden: page.kind === "database", onClick: () => openModal("history") },
             { label: `Versões em conflito (${page.conflicts?.length ?? 0})`, icon: <TriangleAlert />, hidden: !page.conflicts?.length, onClick: () => openModal("conflicts") },
             { separator: true },
             ...pageMenuItems(page, profiles),

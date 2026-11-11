@@ -106,7 +106,7 @@ export function createStore<T>(initial: T) {
   };
 }
 
-export type ModalName = "search" | "settings" | "trash" | "templates" | "conflicts" | null;
+export type ModalName = "search" | "settings" | "trash" | "templates" | "conflicts" | "history" | null;
 export const modalStore = createStore<ModalName>(null);
 export const mobileSidebarStore = createStore<boolean>(false);
 

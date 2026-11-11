@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { Profile } from "../db/types";
-import { db } from "../db/schema";
+import { db, getMeta, setMeta } from "../db/schema";
+import { exportBackup } from "../export/exporter";
+import { backupAgeLabel, backupDue, snoozeUntil } from "../lib/backup";
 import { useTreePages } from "../db/hooks";
 import { createPage } from "../db/repo";
 import { getSyncStatus, syncNow, syncStatus, type SyncStatus } from "../sync/syncEngine";
 import { mobileSidebarStore, navigate, openModal, routeStore, sidebarStore, useStore } from "../lib/store";
 import { ProfileSwitcher } from "./ProfileSwitcher";
 import { PageTree, openPage } from "./PageTree";
-import { pageTitle, timeAgo } from "./ui";
-import { FileText, House, LayoutTemplate, Plus, RefreshCw, Search, Settings, Trash2 } from "./icons";
+import { pageTitle, timeAgo, toast } from "./ui";
+import { FileText, House, LayoutTemplate, Plus, RefreshCw, Search, Settings, ShieldCheck, Trash2 } from "./icons";
 
 const SYNC_LABELS: Record<SyncStatus["state"], string> = {
   disconnected: "Somente neste aparelho",
@@ -50,6 +52,47 @@ function SyncIndicator() {
       {s.state !== "disconnected" && <span className="sync-now" title="Sincronizar agora">
           <RefreshCw />
         </span>}
+    </div>
+  );
+}
+
+/** Aviso discreto quando o último backup completo tem mais de 7 dias. */
+function BackupReminder() {
+  const [busy, setBusy] = useState(false);
+  const info = useLiveQuery(async () => {
+    const hasPages = (await db.pages.filter((p) => !p.deleted).count()) > 0;
+    const last = await getMeta<number | null>("lastBackup", null);
+    const snooze = await getMeta<number | null>("backupSnooze", null);
+    return { hasPages, last, snooze };
+  }, []);
+  if (!info || !info.hasPages || !backupDue(info.last, info.snooze, Date.now())) return null;
+
+  const backup = async () => {
+    setBusy(true);
+    try {
+      await exportBackup();
+      toast("Backup salvo em Downloads. Guarde uma cópia fora do computador (Drive, pendrive).");
+    } catch (e) {
+      toast(`Erro: ${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="backup-reminder">
+      <div className="backup-reminder-text">
+        <ShieldCheck />
+        <span>{info.last ? `Último backup ${backupAgeLabel(info.last, Date.now())}.` : "Você ainda não fez um backup."}</span>
+      </div>
+      <div className="row">
+        <button className="btn" disabled={busy} onClick={backup}>
+          {busy ? "Gerando…" : "Fazer backup"}
+        </button>
+        <button className="ghost-btn" onClick={() => setMeta("backupSnooze", snoozeUntil(Date.now()))}>
+          Depois
+        </button>
+      </div>
     </div>
   );
 }
@@ -154,6 +197,7 @@ export function Sidebar({ profiles, profile }: { profiles: Profile[]; profile: P
           {pages ? <PageTree pages={pages} activeId={activeId} profiles={profiles} /> : null}
         </div>
 
+        <BackupReminder />
         <div className="side-item" onClick={() => openModal("trash")} style={{ marginBottom: 4 }}>
           <span className="icon">
             <Trash2 />

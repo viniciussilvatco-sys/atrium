@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Asset, DirtyEntry, MetaEntry, Page, Profile, RemoteEntry } from "./types";
+import type { Asset, DirtyEntry, MetaEntry, Page, PageVersion, Profile, RemoteEntry } from "./types";
 
 export class AtriumDB extends Dexie {
   profiles!: EntityTable<Profile, "id">;
@@ -8,6 +8,7 @@ export class AtriumDB extends Dexie {
   dirty!: EntityTable<DirtyEntry, "key">;
   remote!: EntityTable<RemoteEntry, "key">;
   meta!: EntityTable<MetaEntry, "key">;
+  versions!: EntityTable<PageVersion, "id">;
 
   constructor() {
     super("atrium");
@@ -18,6 +19,10 @@ export class AtriumDB extends Dexie {
       dirty: "key",
       remote: "key, fileId",
       meta: "key",
+    });
+    // v2: histórico de versões das páginas.
+    this.version(2).stores({
+      versions: "id, pageId, at, [pageId+at]",
     });
   }
 }

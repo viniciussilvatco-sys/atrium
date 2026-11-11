@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { Profile } from "../db/types";
-import { db } from "../db/schema";
+import { db, getMeta } from "../db/schema";
+import { BACKUP_EVERY_DAYS, backupAgeLabel } from "../lib/backup";
 import { authChanges, connect, disconnect, getAuthState, getClientId, getConnectedEmail, setClientId } from "../sync/googleAuth";
 import { getQuota } from "../sync/driveApi";
 import { resetSyncState, syncNow } from "../sync/syncEngine";
@@ -91,7 +92,7 @@ function GoogleSection() {
             <button
               className="btn"
               onClick={async () => {
-                if (!confirmAction("Desconectar o Google Drive neste aparelho? Seus dados locais continuam aqui e no Drive.")) return;
+                if (!confirmAction("Desconectar o Google Drive neste aparelho? Seus dados continuam aqui e no Drive.\n\nAo conectar de novo, o Atrium vai conferir e enviar todas as páginas outra vez (pode demorar). Se a sessão só expirou, use “Reconectar” em vez disso.")) return;
                 disconnect();
                 await resetSyncState();
               }}
@@ -265,6 +266,8 @@ export function SettingsModal({ profile, onClose }: { profile: Profile | undefin
     return { pages, assets: assets.length, bytes: assets.reduce((s, a) => s + (a.blob?.size ?? a.size ?? 0), 0) };
   }, []);
 
+  const lastBackup = useLiveQuery(() => getMeta<number | null>("lastBackup", null), []);
+
   const run = async (label: string, fn: () => Promise<unknown>) => {
     setBusy(label);
     try {
@@ -304,6 +307,10 @@ export function SettingsModal({ profile, onClose }: { profile: Profile | undefin
           <Package /> Exportar e backup
         </h3>
         <p>Exporte suas anotações em Markdown (abre em qualquer editor) ou faça um backup completo para restaurar depois.</p>
+        <p className="faint">
+          Último backup completo neste aparelho: <b>{backupAgeLabel(lastBackup ?? null, Date.now())}</b>. Guarde o arquivo fora do computador (uma
+          pasta do Google Drive ou um pendrive). O Atrium lembra você a cada {BACKUP_EVERY_DAYS} dias.
+        </p>
         <div className="row">
           {profile && (
             <button className="btn" disabled={!!busy} onClick={() => run("export", () => exportProfile(profile.id))}>

@@ -1451,6 +1451,115 @@ a {
   margin: 8px 0;
 }
 
+/* ---------- Histórico de versões ---------- */
+
+.history {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 16px;
+  height: min(60vh, 560px);
+}
+.history-list {
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding-right: 8px;
+}
+.history-day {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-faint);
+  padding: 10px 8px 4px;
+}
+.history-day:first-child {
+  padding-top: 0;
+}
+.history-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.history-item:hover {
+  background: var(--bg-hover);
+}
+.history-item.active {
+  background: var(--accent-soft);
+  color: var(--accent-soft-text);
+  font-weight: 500;
+}
+.history-item .faint {
+  font-size: 11px;
+  font-weight: 400;
+}
+.history-preview {
+  overflow-y: auto;
+  min-width: 0;
+}
+.history-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-elevated);
+  padding-bottom: 8px;
+  z-index: 2;
+}
+.history-title {
+  font-size: 26px;
+  margin: 8px 0 4px 54px;
+}
+.history-preview .bn-container,
+.history-preview .bn-editor {
+  background: transparent;
+}
+.history-empty {
+  text-align: center;
+  padding: 24px 12px;
+  color: var(--text-muted);
+}
+.history-empty .lucide {
+  width: 28px;
+  height: 28px;
+  color: var(--text-faint);
+}
+
+/* ---------- Lembrete de backup (barra lateral) ---------- */
+
+.backup-reminder {
+  margin: 4px 8px 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.backup-reminder-text {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.backup-reminder-text .lucide {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.backup-reminder .row {
+  gap: 6px;
+}
+.backup-reminder button {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
 /* ---------- Celular ---------- */
 
 .mobile-backdrop {
@@ -1529,6 +1638,23 @@ a {
   }
   .modal-backdrop {
     padding-top: 5vh;
+  }
+  .history {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 70vh;
+  }
+  .history-list {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0 0 8px;
+    max-height: 150px;
+  }
+  .history-title {
+    margin-left: 0;
+  }
+  .history-preview .bn-editor {
+    padding-inline: 0;
   }
 }
 

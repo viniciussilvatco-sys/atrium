@@ -17,7 +17,8 @@ Publicado em <https://viniciussilvatco-sys.github.io/atrium/> (repositório `vin
 
 ```
 npm run dev        # http://localhost:5173
-npm test           # Vitest (funções puras: merge, filtros, export, importação do Notion, embeds, recentes do menu "/")
+npm test           # Vitest (funções puras: merge, filtros, export, importação do Notion, embeds, recentes do menu "/",
+                   #   histórico de versões, lembrete de backup)
 npm run typecheck  # tsc -b
 npm run build      # tsc + vite build (gera dist/, PWA com service worker)
 ```
@@ -43,7 +44,12 @@ npm run build      # tsc + vite build (gera dist/, PWA com service worker)
 - **Páginas:** `Page.kind` = `page` | `database` | `row`. Bancos de dados guardam `dbSchema` e `views`;
   cada linha é uma página `row` filha (`src/database/`, filtros/ordenação puros em `query.ts`).
 - **Perfis** = espaços isolados (`profileId` em cada página). Templates são páginas com `isTemplate`.
-- **Exportação/backup:** `src/export/` (Markdown ZIP, JSON). **Importação do Notion:** `src/import/`
+- **Histórico de versões** (menu ⋯ → "Histórico de versões", `HistoryModal.tsx`): tabela local `db.versions`
+  (Dexie v2, **não sincronizada**). `updatePage` guarda foto do estado anterior no máximo a cada 10 min; o sync guarda
+  foto antes de sobrescrever com conteúdo de outro aparelho; restaurar guarda o estado atual antes. Regras de
+  intervalo/limpeza puras em `src/lib/versions.ts` (`pruneVersions` roda ao abrir o app).
+- **Exportação/backup:** `src/export/` (Markdown ZIP, JSON). O backup completo grava `lastBackup` em `db.meta`; a barra
+  lateral mostra um lembrete discreto após 7 dias ("Depois" adia 3 dias; regras em `src/lib/backup.ts`). **Importação do Notion:** `src/import/`
   (`notionParse.ts` puro e testado; `notionImport.ts` lê o ZIP, inclusive ZIPs aninhados).
 - **Visual:** cores/tamanhos são variáveis em `src/styles/theme.css` (`--radius-sm/--radius/--radius-lg`, `--shadow`,
   `--accent-soft` para a página ativa). A área principal é um "cartão" sobre o fundo da barra lateral (no celular, tela cheia).

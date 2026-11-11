@@ -4,7 +4,7 @@ import { registerSW } from "virtual:pwa-register";
 import "./styles/theme.css";
 import "./lib/install";
 import App from "./App";
-import { purgeOldTrash } from "./db/repo";
+import { pruneVersions, purgeOldTrash } from "./db/repo";
 import { startSyncEngine } from "./sync/syncEngine";
 import { effectiveThemeStore } from "./lib/store";
 
@@ -19,6 +19,8 @@ navigator.storage?.persisted?.().then((p) => {
 });
 
 purgeOldTrash().catch(() => {});
+// Limpa versões antigas do histórico um pouco depois de abrir, sem atrasar o início.
+setTimeout(() => pruneVersions().catch(() => {}), 5000);
 startSyncEngine();
 
 createRoot(document.getElementById("root")!).render(

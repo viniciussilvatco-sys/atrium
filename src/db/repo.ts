@@ -1,8 +1,10 @@
+import Dexie from "dexie";
 import { db } from "./schema";
-import type { Asset, DbView, Page, PageKind, Profile, PropDef, SyncRecordType } from "./types";
+import type { Asset, DbView, Page, PageKind, PageVersion, Profile, PropDef, SyncRecordType } from "./types";
 import { newId, getDeviceId } from "../lib/ids";
 import { blocksToText, cloneBlocks, findAssetIds } from "../lib/blocks";
 import { localChanges } from "../lib/events";
+import { shouldSnapshot, versionsToPrune } from "../lib/versions";
 
 export const TRASH_RETENTION_DAYS = 30;
 
@@ -110,15 +112,74 @@ export async function createPage(input: NewPageInput): Promise<Page> {
 }
 
 export async function updatePage(id: string, patch: Partial<Page>) {
-  await db.transaction("rw", db.pages, db.dirty, async () => {
+  await db.transaction("rw", db.pages, db.dirty, db.versions, async () => {
     const p = await db.pages.get(id);
     if (!p) return;
+    // Antes de mudar o conteúdo, guarda (no máximo a cada 10 min) uma foto do estado anterior.
+    if ("content" in patch || "title" in patch || "properties" in patch || "icon" in patch) await snapshotPage(p, "auto");
     const next = { ...p, ...patch };
     if (patch.content) next.text = blocksToText(patch.content);
     await db.pages.put(stamp(next));
     await db.dirty.put({ key: `page:${id}`, at: Date.now() });
   });
   localChanges.emit();
+}
+
+// ---------- Histórico de versões ----------
+
+function lastVersion(pageId: string) {
+  return db.versions.where("[pageId+at]").between([pageId, Dexie.minKey], [pageId, Dexie.maxKey]).last();
+}
+
+/** Guarda uma foto da página no histórico, se ela mudou desde a última foto (ou se `force`). */
+export async function snapshotPage(page: Page, reason: PageVersion["reason"], force = false) {
+  if (page.deleted) return;
+  const now = Date.now();
+  if (!shouldSnapshot(page, await lastVersion(page.id), now, force)) return;
+  await db.versions.put({
+    id: newId(),
+    pageId: page.id,
+    profileId: page.profileId,
+    at: page.updatedAt,
+    savedAt: now,
+    reason,
+    title: page.title,
+    icon: page.icon,
+    content: page.content ?? [],
+    properties: page.properties ?? {},
+  });
+}
+
+/** Volta a página para uma versão do histórico. O estado atual vira uma versão antes, para dar para desfazer. */
+export async function restoreVersion(versionId: string) {
+  const v = await db.versions.get(versionId);
+  if (!v) return;
+  const page = await db.pages.get(v.pageId);
+  if (!page || page.deleted) return;
+  await snapshotPage(page, "restore", true);
+  const patch: Partial<Page> = { title: v.title, icon: v.icon, content: v.content };
+  if (page.kind === "row") patch.properties = v.properties;
+  await updatePage(page.id, patch);
+}
+
+/** Apaga versões antigas (regras em lib/versions.ts). Roda ao abrir o app. */
+export async function pruneVersions() {
+  const ordered = db.versions.orderBy("[pageId+at]");
+  const keys = (await ordered.keys()) as unknown as [string, number][];
+  const ids = (await db.versions.orderBy("[pageId+at]").primaryKeys()) as string[];
+  const byPage = new Map<string, { id: string; at: number }[]>();
+  keys.forEach(([pageId, at], i) => {
+    const list = byPage.get(pageId) ?? [];
+    list.push({ id: ids[i], at });
+    byPage.set(pageId, list);
+  });
+  const now = Date.now();
+  const remove: string[] = [];
+  for (const [pageId, list] of byPage) {
+    const page = await db.pages.get(pageId);
+    remove.push(...versionsToPrune(list, now, !page || !!page.deleted));
+  }
+  if (remove.length) await db.versions.bulkDelete(remove);
 }
 
 export async function getDescendants(id: string): Promise<Page[]> {

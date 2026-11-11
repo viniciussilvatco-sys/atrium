@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import { db } from "../db/schema";
+import { db, setMeta } from "../db/schema";
 import type { Asset, Page, Profile } from "../db/types";
 import { findAssetIds } from "../lib/blocks";
 import { localChanges } from "../lib/events";
@@ -115,6 +115,9 @@ export async function exportBackup() {
   const backup: BackupFile = { app: "atrium", version: 1, exportedAt: Date.now(), profiles, pages, assets };
   const date = new Date().toISOString().slice(0, 10);
   downloadBlob(new Blob([JSON.stringify(backup)], { type: "application/json" }), `atrium-backup-${date}.json`);
+  // Guarda a data para o lembrete de backup (Configurações e barra lateral).
+  await setMeta("lastBackup", Date.now());
+  await setMeta("backupSnooze", null);
 }
 
 /** Importa um backup, mantendo a versão mais recente de cada item. Retorna quantos itens mudaram. */

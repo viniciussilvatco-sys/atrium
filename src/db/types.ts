@@ -140,3 +140,20 @@ export interface MetaEntry {
 }
 
 export type SyncRecordType = "page" | "profile" | "asset";
+
+/** Foto antiga de uma página (histórico de versões). Fica só neste aparelho, não é sincronizada. */
+export interface PageVersion {
+  id: string;
+  pageId: string;
+  profileId: string;
+  /** Quando este conteúdo foi editado pela última vez (é o horário mostrado no histórico). */
+  at: number;
+  /** Quando a foto foi tirada (usado para o intervalo mínimo entre fotos). */
+  savedAt: number;
+  /** auto = enquanto editava; remote = antes de chegar uma alteração de outro aparelho; restore = antes de restaurar outra versão */
+  reason: "auto" | "remote" | "restore";
+  title: string;
+  icon: string;
+  content: unknown[];
+  properties: Record<string, unknown>;
+}

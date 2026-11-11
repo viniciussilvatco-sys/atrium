@@ -21,6 +21,7 @@ import { SettingsModal } from "./components/SettingsModal";
 import { ConflictsModal, TemplatesModal, TrashModal } from "./components/Modals";
 import { ToastHost } from "./components/ui";
 import { MoveModal } from "./components/MoveModal";
+import { HistoryModal } from "./components/HistoryModal";
 import { useSyncStatus } from "./components/Sidebar";
 
 export default function App() {
@@ -102,6 +103,7 @@ export default function App() {
       {modal === "trash" && <TrashModal profile={profile} onClose={close} />}
       {modal === "templates" && <TemplatesModal profile={profile} onClose={close} />}
       {modal === "conflicts" && route && <ConflictsModal pageId={route} onClose={close} />}
+      {modal === "history" && route && <HistoryModal pageId={route} onClose={close} />}
       {moving && <MoveModal pageId={moving} profiles={profiles ?? []} onClose={() => moveStore.set(null)} />}
       <ToastHost />
     </div>

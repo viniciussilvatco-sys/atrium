@@ -6,6 +6,8 @@ import { db, getMeta, setMeta } from "../db/schema";
 import type { Asset, Page, Profile, SyncRecordType } from "../db/types";
 import { Emitter, localChanges } from "../lib/events";
 import { mergePage, mergeSimple } from "./merge";
+import { snapshotPage } from "../db/repo";
+import { sameVersionContent } from "../lib/versions";
 import { NotAuthorizedError, deleteFile, downloadBlob, downloadJson, listFiles, uploadFile, type DriveFile } from "./driveApi";
 import { authChanges, getAuthState, isConnected } from "./googleAuth";
 
@@ -66,6 +68,8 @@ async function applyRemoteFile(f: DriveFile, changedPages: string[]) {
     const local = await db.pages.get(parsed.id);
     const res = mergePage(local, remote, dirty);
     if (res.write) {
+      // O conteúdo deste aparelho vai ser substituído: guarda uma foto dele no histórico antes.
+      if (local && !local.deleted && !sameVersionContent(local, res.write)) await snapshotPage(local, "remote", true);
       await db.pages.put(res.write);
       changedPages.push(parsed.id);
     }
