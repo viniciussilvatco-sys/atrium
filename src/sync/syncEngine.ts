@@ -8,6 +8,7 @@ import { Emitter, localChanges } from "../lib/events";
 import { mergePage, mergeSimple } from "./merge";
 import { snapshotPage } from "../db/repo";
 import { sameVersionContent } from "../lib/versions";
+import { PULL_CONCURRENCY, runPool, sortForPull } from "./pool";
 import { NotAuthorizedError, deleteFile, downloadBlob, downloadJson, listFiles, uploadFile, type DriveFile } from "./driveApi";
 import { authChanges, getAuthState, isConnected } from "./googleAuth";
 
@@ -56,10 +57,14 @@ async function applyRemoteFile(f: DriveFile, changedPages: string[]) {
   if (!parsed) return;
   const key = `${parsed.type}:${parsed.id}`;
   const known = await db.remote.get(key);
-  await db.remote.put({ key, fileId: f.id, modifiedTime: f.modifiedTime });
-  // Fomos nós que gravamos esta versão: nada a fazer.
+  // Já temos esta versão (fomos nós que gravamos, ou já foi baixada): nada a fazer.
   if (known && known.fileId === f.id && known.modifiedTime === f.modifiedTime) return;
+  await mergeRemoteFile(f, parsed, key, changedPages);
+  // Só anota como visto depois de aplicar: se o download falhar no meio, o arquivo é tentado de novo.
+  await db.remote.put({ key, fileId: f.id, modifiedTime: f.modifiedTime });
+}
 
+async function mergeRemoteFile(f: DriveFile, parsed: { type: SyncRecordType; id: string }, key: string, changedPages: string[]) {
   const dirty = await isDirty(key);
 
   if (parsed.type === "page") {
@@ -117,18 +122,23 @@ async function pull() {
   const since = await getMeta<string | null>("lastPull", null);
   // Pequena sobreposição para não perder arquivos gravados no mesmo segundo.
   const sinceIso = since ? new Date(new Date(since).getTime() - 3000).toISOString() : undefined;
-  const files = await listFiles(sinceIso);
+  const files = sortForPull(await listFiles(sinceIso));
   const changedPages: string[] = [];
-  let maxTime = since;
-  let n = 0;
-  for (const f of files) {
-    n++;
-    if (files.length > 20) setStatus({ progress: `Baixando ${n}/${files.length}` });
-    await applyRemoteFile(f, changedPages);
-    if (!maxTime || f.modifiedTime > maxTime) maxTime = f.modifiedTime;
+  let done = 0;
+  if (files.length > 20) setStatus({ progress: `Baixando 0/${files.length}` });
+  try {
+    // Vários downloads ao mesmo tempo: a primeira sincronização num navegador novo fica bem mais rápida.
+    await runPool(files, PULL_CONCURRENCY, async (f) => {
+      await applyRemoteFile(f, changedPages);
+      done++;
+      if (files.length > 20) setStatus({ progress: `Baixando ${done}/${files.length}` });
+    });
+  } finally {
+    if (changedPages.length) remoteChanges.emit({ pages: changedPages });
   }
+  // Só avança a marca de tempo quando tudo deu certo (o que já foi baixado não é baixado de novo).
+  const maxTime = files.reduce<string | null>((m, f) => (!m || f.modifiedTime > m ? f.modifiedTime : m), since);
   if (maxTime) await setMeta("lastPull", maxTime);
-  if (changedPages.length) remoteChanges.emit({ pages: changedPages });
 }
 
 // ---------- Push ----------

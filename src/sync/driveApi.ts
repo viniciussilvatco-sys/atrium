@@ -20,19 +20,22 @@ export class NotAuthorizedError extends Error {
   }
 }
 
-async function authed(input: string, init: RequestInit = {}, retry = true): Promise<Response> {
+const MAX_BUSY_RETRIES = 4;
+
+async function authed(input: string, init: RequestInit = {}, retry401 = true, attempt = 0): Promise<Response> {
   const token = await getToken();
   if (!token) throw new NotAuthorizedError();
   const headers = new Headers(init.headers);
   headers.set("Authorization", `Bearer ${token}`);
   const res = await fetch(input, { ...init, headers });
-  if (res.status === 401 && retry) {
+  if (res.status === 401 && retry401) {
     invalidateToken();
-    return authed(input, init, false);
+    return authed(input, init, false, attempt);
   }
-  if ((res.status === 429 || res.status >= 500) && retry) {
-    await new Promise((r) => setTimeout(r, 1500));
-    return authed(input, init, false);
+  // Drive ocupado ("muitas requisições" ou erro temporário): espera cada vez mais e tenta de novo.
+  if ((res.status === 429 || res.status >= 500) && attempt < MAX_BUSY_RETRIES) {
+    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt + Math.random() * 500));
+    return authed(input, init, retry401, attempt + 1);
   }
   if (!res.ok && res.status !== 404) {
     const body = await res.text().catch(() => "");

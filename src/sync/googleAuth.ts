@@ -215,10 +215,18 @@ function armReauthOnNextGesture() {
 }
 
 /** Retorna um token válido, renovando quando possível. Null se não conectado. */
+let tokenRequest: Promise<string | null> | null = null;
+
 export async function getToken(): Promise<string | null> {
   if (!isConnected() || !getClientId()) return null;
   const cached = readToken();
   if (cached) return cached.token;
+  // Vários downloads ao mesmo tempo esperam o mesmo pedido de renovação, em vez de abrir vários.
+  tokenRequest ??= renewToken().finally(() => (tokenRequest = null));
+  return tokenRequest;
+}
+
+async function renewToken(): Promise<string | null> {
   try {
     const t = await requestToken("");
     if (reauthNeeded) {

@@ -35,7 +35,8 @@ npm run build      # tsc + vite build (gera dist/, PWA com service worker)
   Toda escrita passa por `src/db/repo.ts`, que carimba `updatedAt`/`deviceId` e grava a pendência em `db.dirty`.
 - **Sync** (`src/sync/`): cada página/perfil/arquivo é um arquivo no `appDataFolder` do Drive
   (`page-<id>.json`, `profile-<id>.json`, `asset-<id>` com metadados em `appProperties`).
-  `syncEngine.ts` faz pull (por `modifiedTime`) → merge → push da fila `dirty`. `merge.ts` é puro e testado:
+  `syncEngine.ts` faz pull (por `modifiedTime`, 6 downloads em paralelo via `pool.ts`; perfis → páginas → arquivos;
+  `db.remote` só é gravado depois de aplicar, para um download que falhou ser refeito) → merge → push da fila `dirty`. `merge.ts` é puro e testado:
   maior `updatedAt` vence, tombstones (`deleted`) sempre vencem, e edições simultâneas guardam a perdedora em `page.conflicts`.
   Login via Google Identity Services (token de 1 h, escopo `drive.appdata`, sem servidor).
 - **Editor:** BlockNote 0.56 (`src/editor/`). Blocos próprios: `callout`, `math` (KaTeX), `embed`, `pdf`, `subpage`,
