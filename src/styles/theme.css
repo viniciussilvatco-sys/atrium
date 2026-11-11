@@ -1159,9 +1159,6 @@ a {
 .subpage-block:hover {
   background: var(--bg-hover);
 }
-.subpage-block .t {
-  border-bottom: 1px solid var(--border-strong);
-}
 
 .page-link {
   cursor: pointer;
