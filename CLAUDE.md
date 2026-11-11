@@ -49,7 +49,9 @@ npm run build      # tsc + vite build (gera dist/, PWA com service worker)
   (Dexie v2, **não sincronizada**). `updatePage` guarda foto do estado anterior no máximo a cada 10 min; o sync guarda
   foto antes de sobrescrever com conteúdo de outro aparelho; restaurar guarda o estado atual antes. Regras de
   intervalo/limpeza puras em `src/lib/versions.ts` (`pruneVersions` roda ao abrir o app).
-- **Exportação/backup:** `src/export/` (Markdown ZIP, JSON). O backup completo grava `lastBackup` em `db.meta`; a barra
+- **Exportação/backup:** `src/export/` (Markdown ZIP; backup completo em **.zip**: `atrium-backup.json` + `paginas/<id>.json`
+  + `arquivos/<id>` binários — nunca montar o backup como uma string só, estoura "Invalid string length"; a restauração
+  ainda aceita o `.json` antigo). O backup completo grava `lastBackup` em `db.meta`; a barra
   lateral mostra um lembrete discreto após 7 dias ("Depois" adia 3 dias; regras em `src/lib/backup.ts`). **Importação do Notion:** `src/import/`
   (`notionParse.ts` puro e testado; `notionImport.ts` lê o ZIP, inclusive ZIPs aninhados).
 - **Visual:** cores/tamanhos são variáveis em `src/styles/theme.css` (`--radius-sm/--radius/--radius-lg`, `--shadow`,

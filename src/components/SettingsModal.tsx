@@ -318,7 +318,7 @@ export function SettingsModal({ profile, onClose }: { profile: Profile | undefin
             </button>
           )}
           <button className="btn" disabled={!!busy} onClick={() => run("backup", exportBackup)}>
-            {busy === "backup" ? "Gerando…" : "Backup completo (.json)"}
+            {busy === "backup" ? "Gerando…" : "Backup completo (.zip)"}
           </button>
           <button className="btn" disabled={!!busy} onClick={() => fileInput.current?.click()}>
             {busy === "import" ? "Importando…" : "Restaurar backup…"}
@@ -326,7 +326,7 @@ export function SettingsModal({ profile, onClose }: { profile: Profile | undefin
           <input
             ref={fileInput}
             type="file"
-            accept="application/json,.json"
+            accept=".zip,.json,application/zip,application/json"
             hidden
             onChange={(e) => {
               const f = e.target.files?.[0];

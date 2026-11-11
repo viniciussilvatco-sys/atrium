@@ -21,7 +21,11 @@ export function Home({ profile }: { profile: Profile }) {
         .equals(profile.id)
         .filter((p) => !p.deleted && p.trashedAt === null && !p.isTemplate)
         .toArray();
-      return pages.sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 12);
+      const byId = new Map(pages.map((p) => [p.id, p]));
+      return pages
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .slice(0, 15)
+        .map((p) => ({ page: p, parent: p.parentId ? byId.get(p.parentId) : undefined }));
     },
     [profile.id],
     [],
@@ -74,12 +78,13 @@ export function Home({ profile }: { profile: Profile }) {
       {recent.length > 0 && (
         <>
           <h3 style={{ marginTop: 36, fontSize: 14, color: "var(--text-muted)" }}>Editadas recentemente</h3>
-          <div className="home-grid">
-            {recent.map((p) => (
-              <button key={p.id} className="home-card" onClick={() => openPage(p.id)}>
-                <div className="big">{p.icon || (p.kind === "database" ? <Database /> : <FileText />)}</div>
-                <div className="t">{pageTitle(p)}</div>
-                <div className="s">{timeAgo(p.updatedAt)}</div>
+          <div className="recent-list">
+            {recent.map(({ page: p, parent }) => (
+              <button key={p.id} className="recent-row" onClick={() => openPage(p.id)} title={new Date(p.updatedAt).toLocaleString("pt-BR")}>
+                <span className="icon">{p.icon || (p.kind === "database" ? <Database /> : <FileText />)}</span>
+                <span className="title">{pageTitle(p)}</span>
+                {parent && <span className="where">em {parent.icon ? `${parent.icon} ` : ""}{pageTitle(parent)}</span>}
+                <span className="when">{timeAgo(p.updatedAt)}</span>
               </button>
             ))}
           </div>

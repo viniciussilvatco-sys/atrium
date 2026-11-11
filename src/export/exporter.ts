@@ -76,25 +76,34 @@ export async function exportProfile(profileId: string) {
   downloadBlob(blob, `Atrium - ${safeName(profile?.name ?? "perfil")}.zip`);
 }
 
-// ---------- Backup completo (JSON) ----------
+// ---------- Backup completo ----------
+//
+// Formato atual (.zip): "atrium-backup.json" (perfis e dados dos arquivos), "paginas/<id>.json" (uma por página)
+// e "arquivos/<id>" (imagens, PDFs… guardados como arquivos normais). Nada vira um texto gigante, então não há
+// limite de tamanho ("Invalid string length" acontecia no formato antigo).
+// O formato antigo (.json único, arquivos em base64) continua sendo aceito na restauração.
 
-interface BackupFile {
+type AssetMeta = Omit<Asset, "blob">;
+
+interface BackupManifest {
+  app: "atrium";
+  version: 2;
+  exportedAt: number;
+  profiles: Profile[];
+  assets: AssetMeta[];
+  pageCount: number;
+}
+
+interface LegacyBackupFile {
   app: "atrium";
   version: 1;
   exportedAt: number;
   profiles: Profile[];
   pages: Page[];
-  assets: (Omit<Asset, "blob"> & { data?: string })[];
+  assets: (AssetMeta & { data?: string })[];
 }
 
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result).split(",")[1] ?? "");
-    r.onerror = () => reject(r.error);
-    r.readAsDataURL(blob);
-  });
-}
+const MANIFEST = "atrium-backup.json";
 
 function base64ToBlob(data: string, mime: string): Blob {
   const bin = atob(data);
@@ -104,52 +113,97 @@ function base64ToBlob(data: string, mime: string): Blob {
 }
 
 export async function exportBackup() {
-  const profiles = await db.profiles.toArray();
-  const pages = await db.pages.toArray();
-  const assets: BackupFile["assets"] = [];
+  const zip = new JSZip();
+  let pageCount = 0;
+  await db.pages.each((p) => {
+    zip.file(`paginas/${p.id}.json`, JSON.stringify(p));
+    pageCount++;
+  });
+  const assets: AssetMeta[] = [];
   for (const a of await db.assets.toArray()) {
     const { blob, ...meta } = a;
+    assets.push(meta);
     const b = blob ?? (a.deleted ? null : await fetchAssetBlob(a.id));
-    assets.push({ ...meta, data: b ? await blobToBase64(b) : undefined });
+    // Imagens e PDFs já são comprimidos: guardar sem recomprimir é bem mais rápido.
+    if (b) zip.file(`arquivos/${a.id}`, b, { compression: "STORE" });
   }
-  const backup: BackupFile = { app: "atrium", version: 1, exportedAt: Date.now(), profiles, pages, assets };
+  const manifest: BackupManifest = { app: "atrium", version: 2, exportedAt: Date.now(), profiles: await db.profiles.toArray(), assets, pageCount };
+  zip.file(MANIFEST, JSON.stringify(manifest));
+  const out = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
   const date = new Date().toISOString().slice(0, 10);
-  downloadBlob(new Blob([JSON.stringify(backup)], { type: "application/json" }), `atrium-backup-${date}.json`);
+  downloadBlob(out, `atrium-backup-${date}.zip`);
   // Guarda a data para o lembrete de backup (Configurações e barra lateral).
   await setMeta("lastBackup", Date.now());
   await setMeta("backupSnooze", null);
 }
 
-/** Importa um backup, mantendo a versão mais recente de cada item. Retorna quantos itens mudaram. */
-export async function importBackup(file: File): Promise<number> {
-  const data = JSON.parse(await file.text()) as BackupFile;
-  if (data.app !== "atrium") throw new Error("Este arquivo não é um backup do Atrium.");
-  let changed = 0;
+// Cada item do backup só entra se for mais novo que o que já está no aparelho.
+
+async function restoreProfile(p: Profile, now: number): Promise<boolean> {
+  const local = await db.profiles.get(p.id);
+  if (local && pickWinner(local, p) !== "remote") return false;
+  await db.profiles.put(p);
+  await db.dirty.put({ key: `profile:${p.id}`, at: now });
+  return true;
+}
+
+async function restorePageItem(p: Page, now: number): Promise<boolean> {
+  const local = await db.pages.get(p.id);
+  if (local && pickWinner(local, p) !== "remote") return false;
+  await db.pages.put(p);
+  await db.dirty.put({ key: `page:${p.id}`, at: now });
+  return true;
+}
+
+async function restoreAsset(meta: AssetMeta, getBlob: () => Promise<Blob | undefined>, now: number): Promise<boolean> {
+  const local = await db.assets.get(meta.id);
+  if (local && pickWinner(local, meta) !== "remote" && local.blob) return false;
+  const blob = (await getBlob()) ?? local?.blob;
+  await db.assets.put({ ...meta, blob });
+  await db.dirty.put({ key: `asset:${meta.id}`, at: now });
+  return true;
+}
+
+async function importZipBackup(file: File): Promise<number> {
+  const zip = await JSZip.loadAsync(file);
+  const manifestFile = zip.file(MANIFEST);
+  if (!manifestFile) throw new Error("Este arquivo não é um backup do Atrium.");
+  const manifest = JSON.parse(await manifestFile.async("string")) as BackupManifest;
+  if (manifest.app !== "atrium") throw new Error("Este arquivo não é um backup do Atrium.");
   const now = Date.now();
-  for (const p of data.profiles ?? []) {
-    const local = await db.profiles.get(p.id);
-    if (!local || pickWinner(local, p) === "remote") {
-      await db.profiles.put(p);
-      await db.dirty.put({ key: `profile:${p.id}`, at: now });
-      changed++;
-    }
+  let changed = 0;
+  for (const p of manifest.profiles ?? []) if (await restoreProfile(p, now)) changed++;
+  for (const f of zip.file(/^paginas\/[^/]+\.json$/)) {
+    if (await restorePageItem(JSON.parse(await f.async("string")) as Page, now)) changed++;
   }
-  for (const p of data.pages ?? []) {
-    const local = await db.pages.get(p.id);
-    if (!local || pickWinner(local, p) === "remote") {
-      await db.pages.put(p);
-      await db.dirty.put({ key: `page:${p.id}`, at: now });
-      changed++;
-    }
+  for (const a of manifest.assets ?? []) {
+    const getBlob = async () => {
+      const f = zip.file(`arquivos/${a.id}`);
+      return f ? new Blob([await f.async("blob")], { type: a.mime }) : undefined;
+    };
+    if (await restoreAsset(a, getBlob, now)) changed++;
   }
+  return changed;
+}
+
+async function importLegacyJsonBackup(file: File): Promise<number> {
+  const data = JSON.parse(await file.text()) as LegacyBackupFile;
+  if (data.app !== "atrium") throw new Error("Este arquivo não é um backup do Atrium.");
+  const now = Date.now();
+  let changed = 0;
+  for (const p of data.profiles ?? []) if (await restoreProfile(p, now)) changed++;
+  for (const p of data.pages ?? []) if (await restorePageItem(p, now)) changed++;
   for (const a of data.assets ?? []) {
-    const local = await db.assets.get(a.id);
-    if (local && pickWinner(local, a) !== "remote" && local.blob) continue;
     const { data: b64, ...meta } = a;
-    await db.assets.put({ ...meta, blob: b64 ? base64ToBlob(b64, a.mime) : local?.blob });
-    await db.dirty.put({ key: `asset:${a.id}`, at: now });
-    changed++;
+    if (await restoreAsset(meta, async () => (b64 ? base64ToBlob(b64, a.mime) : undefined), now)) changed++;
   }
+  return changed;
+}
+
+/** Restaura um backup (.zip atual ou .json antigo), mantendo a versão mais recente de cada item. Retorna quantos itens mudaram. */
+export async function importBackup(file: File): Promise<number> {
+  const isZip = (await file.slice(0, 2).text()) === "PK";
+  const changed = isZip ? await importZipBackup(file) : await importLegacyJsonBackup(file);
   localChanges.emit();
   return changed;
 }

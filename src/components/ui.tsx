@@ -233,5 +233,6 @@ export function downloadBlob(blob: Blob, filename: string) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  // Espera bastante antes de liberar a memória: arquivos grandes (backup) demoram para ser gravados.
+  setTimeout(() => URL.revokeObjectURL(url), 120_000);
 }
