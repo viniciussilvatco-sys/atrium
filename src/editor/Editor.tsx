@@ -64,14 +64,6 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       },
     },
     {
-      title: "Frase de destaque",
-      subtext: "Caixa com ícone para chamar atenção",
-      aliases: ["frase", "destaque", "callout", "aviso", "nota", "dica"],
-      group,
-      icon: icon(<Lightbulb />),
-      onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "callout" } as AtriumPartialBlock),
-    },
-    {
       title: "Fórmula (LaTeX)",
       subtext: "Equação matemática em bloco",
       aliases: ["math", "latex", "formula", "equacao", "katex"],
@@ -96,6 +88,25 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "pdf" } as AtriumPartialBlock),
     },
   ];
+}
+
+/** Itens padrão do BlockNote, com a "Frase de destaque" no grupo "Blocos básicos". */
+function basicSlashItems(editor: AtriumEditor): DefaultReactSuggestionItem[] {
+  const items = getDefaultReactSlashMenuItems(editor);
+  const group = "Blocos básicos";
+  const callout: DefaultReactSuggestionItem = {
+    title: "Frase de destaque",
+    subtext: "Caixa com ícone para chamar atenção",
+    aliases: ["frase", "destaque", "callout", "aviso", "nota", "dica"],
+    group,
+    icon: icon(<Lightbulb />),
+    onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "callout" } as AtriumPartialBlock),
+  };
+  // Os grupos precisam ficar contínuos na lista: entra logo depois de "Citação" (ou no fim dos blocos básicos).
+  let at = items.findIndex((it) => (it as { key?: string }).key === "quote");
+  if (at < 0) items.forEach((it, i) => it.group === group && (at = i));
+  if (at < 0) return [...items, callout];
+  return [...items.slice(0, at + 1), callout, ...items.slice(at + 1)];
 }
 
 async function mentionItems(editor: AtriumEditor, page: Page, query: string): Promise<DefaultReactSuggestionItem[]> {
@@ -232,7 +243,7 @@ export function PageEditor({
         triggerCharacter="/"
         getItems={async (query) => {
           const items = filterSuggestionItems(
-            [...getDefaultReactSlashMenuItems(editor), ...atriumSlashItems(editor, pageRef.current, flush)],
+            [...basicSlashItems(editor), ...atriumSlashItems(editor, pageRef.current, flush)],
             query,
           );
           // Sem nada digitado depois da "/", os últimos 5 itens usados aparecem no topo.
