@@ -1064,6 +1064,21 @@ a {
   flex: 1;
   min-width: 0;
 }
+/* Texto de exemplo da frase de destaque vazia: dentro da caixa, ao lado do ícone. */
+.bn-block-content[data-content-type="callout"] {
+  position: relative;
+}
+.bn-block-content[data-content-type="callout"]:has(.ProseMirror-trailingBreak:only-child)::after {
+  position: absolute;
+  left: 52px;
+  top: 17px;
+}
+/* Ícone dentro do rótulo dos itens "Cores" do menu do bloco (o BlockNote não aceita ícone ali). */
+.menu-label-icon {
+  display: inline-flex;
+  margin-right: 10px;
+  vertical-align: -3px;
+}
 
 .math-block {
   width: 100%;

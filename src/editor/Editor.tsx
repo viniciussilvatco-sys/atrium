@@ -21,6 +21,7 @@ import { createDatabase, createPage, updatePage } from "../db/repo";
 import { effectiveThemeStore, navigate, recentSlashStore, useStore } from "../lib/store";
 import { pushRecent, slashItemId, withRecents } from "./recentSlash";
 import { pageTitle } from "../components/ui";
+import { AtriumSideMenu, BlockMoveModal } from "./BlockMenu";
 import { Clapperboard, Database, FilePlus, FileText, Lightbulb, Sigma } from "lucide-react";
 
 const dictionary = {
@@ -29,6 +30,7 @@ const dictionary = {
     ...pt.placeholders,
     emptyDocument: "Digite '/' para comandos ou '@' para citar uma página…",
     default: "Digite '/' para comandos",
+    callout: "Olá, sou uma frase de destaque!",
   },
 };
 
@@ -62,9 +64,9 @@ function atriumSlashItems(editor: AtriumEditor, page: Page, flush: () => Promise
       },
     },
     {
-      title: "Destaque (callout)",
+      title: "Frase de destaque",
       subtext: "Caixa com ícone para chamar atenção",
-      aliases: ["callout", "destaque", "aviso", "nota", "dica"],
+      aliases: ["frase", "destaque", "callout", "aviso", "nota", "dica"],
       group,
       icon: icon(<Lightbulb />),
       onItemClick: () => insertOrUpdateBlockForSlashMenu(editor, { type: "callout" } as AtriumPartialBlock),
@@ -224,7 +226,8 @@ export function PageEditor({
 
   return (
     <>
-      <BlockNoteView editor={editor} theme={theme} editable={editable} onChange={onChange} slashMenu={false}>
+      <BlockNoteView editor={editor} theme={theme} editable={editable} onChange={onChange} slashMenu={false} sideMenu={false}>
+      <AtriumSideMenu />
       <SuggestionMenuController
         triggerCharacter="/"
         getItems={async (query) => {
@@ -245,6 +248,7 @@ export function PageEditor({
       />
       <SuggestionMenuController triggerCharacter="@" getItems={(query) => mentionItems(editor, pageRef.current, query)} />
       </BlockNoteView>
+      {editable && <BlockMoveModal editor={editor} page={page} />}
       {children}
       <div className="editor-tail" onClick={focusEnd} />
     </>

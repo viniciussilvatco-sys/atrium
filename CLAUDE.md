@@ -40,7 +40,9 @@ npm run build      # tsc + vite build (gera dist/, PWA com service worker)
   maior `updatedAt` vence, tombstones (`deleted`) sempre vencem, e edições simultâneas guardam a perdedora em `page.conflicts`.
   Login via Google Identity Services (token de 1 h, escopo `drive.appdata`, sem servidor).
 - **Editor:** BlockNote 0.56 (`src/editor/`). Blocos próprios: `callout`, `math` (KaTeX), `embed`, `pdf`, `subpage`,
-  `database`; menção inline `pageLink` (gatilho `@`). Imagens/arquivos ficam como `asset://<id>`, resolvidos por `editor/assets.ts`.
+  `database`; menção inline `pageLink` (gatilho `@`). O `callout` aparece como "Frase de destaque".
+  Menu dos 6 pontinhos (`editor/BlockMenu.tsx`, funções puras em `blockOps.ts`): Transformar em, Duplicar,
+  Mover para… (acrescenta os blocos ao fim de outra página do mesmo perfil e leva junto subpáginas/bancos citados), Cores, Excluir. Imagens/arquivos ficam como `asset://<id>`, resolvidos por `editor/assets.ts`.
   Não usar pacotes `@blocknote/xl-*` (licença GPL).
 - **Páginas:** `Page.kind` = `page` | `database` | `row`. Bancos de dados guardam `dbSchema` e `views`;
   cada linha é uma página `row` filha (`src/database/`, filtros/ordenação puros em `query.ts`).
